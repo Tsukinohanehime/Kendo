@@ -1833,7 +1833,7 @@ nmLoad();nmApply();
 })();
 function nmHtml(){return '<h3 class="bk-h">Journal name</h3><div class="nmrow"><input class="tin" id="nmTitle" type="text" maxlength="24" value="'+esc(nmSel.t)+'" placeholder="Journal name" aria-label="Journal name" autocomplete="off"><input class="tin" id="nmSub" type="text" maxlength="6" value="'+esc(nmSel.s)+'" placeholder="Label" aria-label="Small label next to the name (optional)" autocomplete="off"></div><div class="chips"><button type="button" class="chip" data-action="nm-reset">Reset name</button></div><p class="bk-small">The small label is optional. The icon name on your home screen stays Keiko Journal.</p>'}
 
-/* ---------- note lock (7-digit code, AES-GCM) ---------- */
+/* ---------- note lock (6-8 digit code, AES-GCM) ---------- */
 const LOCKI='<svg class="nlk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 const UNLOCKI='<svg class="nlk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>';
 S.lk=null;S.lkPlain=new Map();S.lkImg=new Map();S.lkPend=false;S.lkFail=0;S.lkUntil=0;let lkM=null,lkTimer=0;
@@ -1880,10 +1880,10 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)lkRelock()}
 const LK_T={enter:'Locked notes',setup:'Create a code',change:'Change code',manage:'Code settings',reset:'Forgot code'};
 function lkHtml(){
   const m=lkM,err=m.err?`<p class="err" role="alert">${esc(m.err)}</p>`:'';
-  const inp=(id,label,ac)=>`<label class="lkl">${label}<input class="tin lkin" id="${id}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="${ac||'off'}"></label>`;
+  const inp=(id,label,ac)=>`<label class="lkl">${label}<input class="tin lkin" id="${id}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="${ac||'off'}"></label>`;
   let h='';
-  if(m.mode==='enter')h=`<p class="bk-small" style="margin-top:0">Enter your 7-digit code to see your locked notes.</p>${inp('lkA','7-digit code')}${err}<button class="btn" type="submit">Unlock</button>`;
-  else if(m.mode==='setup'||m.mode==='change')h=`<p class="bk-small" style="margin-top:0">Choose a 7-digit code (numbers only). Locked notes are scrambled with it. <b>Nobody can read them without the code, and it cannot be recovered if you forget it.</b> Write it down somewhere safe.</p>${inp('lkA','New 7-digit code','new-password')}${inp('lkB','Type it again','new-password')}${err}<button class="btn" type="submit">${m.mode==='setup'?'Set code':'Change code'}</button>`;
+  if(m.mode==='enter')h=`<p class="bk-small" style="margin-top:0">Enter your code (6 to 8 digits) to see your locked notes.</p>${inp('lkA','Code')}${err}<button class="btn" type="submit">Unlock</button>`;
+  else if(m.mode==='setup'||m.mode==='change')h=`<p class="bk-small" style="margin-top:0">Choose a code of 6 to 8 digits (numbers only). Locked notes are scrambled with it. <b>Nobody can read them without the code, and it cannot be recovered if you forget it.</b> Write it down somewhere safe.</p>${inp('lkA','New code (6 to 8 digits)','new-password')}${inp('lkB','Type it again','new-password')}${err}<button class="btn" type="submit">${m.mode==='setup'?'Set code':'Change code'}</button>`;
   else if(m.mode==='manage')h=`<button type="button" class="btn ghost" data-action="lk-change">Change code</button><button type="button" class="btn ghost" data-action="lk-reset">Forgot code…</button>`;
   else if(m.mode==='reset')h=`<p>This deletes <b>all locked notes</b> and removes the code. Your other notes are not touched. It cannot be undone.</p><button type="button" class="btn" data-action="lk-reset-go">Delete locked notes and reset</button><button type="button" class="btn ghost" data-action="lk-close">Cancel</button>`;
   return `<div class="scrim" data-action="lk-close"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="lkT" tabindex="-1"><div class="sheet-head"><h2 id="lkT">${LK_T[m.mode]}</h2><button class="iconbtn" data-action="lk-close" aria-label="Close">${XICON}</button></div><div class="sheet-body"><form id="lkForm" autocomplete="off">${h}</form></div></div>`;
@@ -1905,7 +1905,7 @@ async function lkSubmit(){
   const a=($('#lkA')||{}).value||'',b=($('#lkB')||{}).value||'';
   const fail=msg=>{m.err=msg;m.busy=false;lkPaint()};
   m.busy=true;const btn=$('#lkForm [type=submit]');if(btn)btn.disabled=true;
-  if(!/^\d{7}$/.test(a))return fail('The code must be 7 digits.');
+  if(!/^\d{6,8}$/.test(a))return fail('The code must be 6 to 8 digits.');
   try{
     if(m.mode==='enter'){
       if(Date.now()<S.lkUntil)return fail('Too many tries. Wait 30 seconds.');
@@ -2608,7 +2608,7 @@ document.addEventListener('submit',ev=>{
 });
 document.addEventListener('input',ev=>{
   const t=ev.target;if(t.id==='tgName'){if(S.tg)S.tg.name=t.value;return}if(t.dataset&&t.dataset.tgname!==undefined)return;if(t.id==='nmTitle'||t.id==='nmSub'){if(t.id==='nmTitle')nmSel.t=t.value;else nmSel.s=t.value;nmSave();nmApply();return}
-  if(t.classList&&t.classList.contains('lkin')){t.value=t.value.replace(/\D/g,'').slice(0,7);if(lkM&&lkM.mode==='enter'&&t.value.length===7)lkSubmit();return}
+  if(t.classList&&t.classList.contains('lkin')){t.value=t.value.replace(/\D/g,'').slice(0,8);if(lkM&&lkM.mode==='enter'&&t.value.length===8)lkSubmit();return}
   if(t.id==='srQ'){S.sq=t.value;const rb=$('#srRes');if(rb)rb.innerHTML=srHtml();return}
   if(t.id==='ntSearch'){S.nq=t.value;const b=$('#ntListBox');if(b)b.innerHTML=ntList();return}
   if(S.nd){const n=S.nd;if(t.id==='ntDate'){if(t.value){n.date=t.value;n.dirty=true}}else if(t.id==='ntTitle'){n.title=t.value;n.dirty=true}else if(t.id==='ntBody'){n.body=t.value;n.dirty=true}else if(t.dataset&&t.dataset.ntvid!==undefined){const i=+t.dataset.ntvid;n.videos[i]=t.value;n.dirty=true;const pv=$('#ntvp'+i);if(pv)pv.innerHTML=vidPreview(t.value)}return}

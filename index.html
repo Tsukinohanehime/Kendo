@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#C0356B">
+<meta name="theme-color" content="#1F3A6E">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Keiko">
@@ -1752,7 +1752,7 @@ const THEMES=[
  {id:'matcha',n:'Matcha',c:['#5E9B2E','#1F9E8F']},{id:'bogu',n:'Bogu',c:['#1F3A6E','#C8383C']},{id:'sumi-shu',n:'Sumi + Shu',c:['#3B3F4A','#E0502B']},
  {id:'tasogare',n:'Dusk',c:['#2850C8','#C93B73']},{id:'kin-ai',n:'Gold + Indigo',c:['#3A47A5','#D9A21A']},{id:'momo',n:'Peach',c:['#E0602B','#C93B73']}
 ];
-const TH_KEY='kj-theme';let thSel={id:'sakura',mode:'auto'};const thHost=document.documentElement.getAttribute('data-theme');
+const TH_KEY='kj-theme';let thSel={id:'kon',mode:'auto'};const thHost=document.documentElement.getAttribute('data-theme');
 function thLoad(){try{const o=JSON.parse(localStorage.getItem(TH_KEY)||'{}');if(THEMES.some(t=>t.id===o.id))thSel.id=o.id;if(['auto','light','dark'].includes(o.mode))thSel.mode=o.mode}catch(e){}}
 function thSave(){try{localStorage.setItem(TH_KEY,JSON.stringify(thSel))}catch(e){}}
 function hexHsl(x){

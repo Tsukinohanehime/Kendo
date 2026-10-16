@@ -398,13 +398,13 @@ html.no-deco .tape,html.no-deco .sparkle{display:none}
 .stamp.got:nth-child(3n+2) .sg{background:var(--lav);color:var(--navy);box-shadow:inset 0 0 0 2px var(--navy)}
 .stamp.got:nth-child(3n) .sg{background:var(--mint);color:var(--navy);box-shadow:inset 0 0 0 2px var(--navy)}
 .bk-list{margin:6px 0 10px;padding-left:18px;display:flex;flex-direction:column;gap:2px;font-size:14px}
-#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--accent);color:var(--accent-ink);transition:opacity .35s}
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(circle at 50% 35%,var(--accent-soft),var(--bg) 70%);color:var(--accent);transition:opacity .35s}
 #splash.out{opacity:0;pointer-events:none}
 #splash .sp-face{width:132px;height:132px;border-radius:50%;background:var(--accent-soft);padding:12px;border:4px solid var(--surface);box-shadow:0 6px 0 var(--line),0 14px 30px rgba(0,0,0,.12);animation:spbob 1.1s ease-in-out infinite}
 #splash .sp-face .face{width:100%;height:100%;border-radius:50%}
-#splash .sp-t{font-family:var(--f-cute);font-size:36px;font-weight:700;text-align:center;padding:0 24px;overflow-wrap:anywhere}
-#splash .sp-s{font-family:var(--f-cute);background:var(--surface);color:var(--accent);border:2px solid var(--line);border-radius:99px;padding:2px 14px;font-size:14px;font-weight:600}
-#splash .sp-d{letter-spacing:.5em;font-size:18px;color:var(--accent-ink);opacity:.75}
+#splash .sp-t{font-family:var(--f-cute);font-size:36px;font-weight:700;text-shadow:3px 3px 0 var(--surface);text-align:center;padding:0 24px;overflow-wrap:anywhere}
+#splash .sp-s{font-family:var(--f-cute);background:var(--surface);border:2px solid var(--line);border-radius:99px;padding:2px 14px;font-size:14px;font-weight:600}
+#splash .sp-d{letter-spacing:.5em;font-size:18px;color:var(--ink-2)}
 html.no-deco #splash .sp-d{display:none}
 @keyframes spbob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
 

@@ -451,6 +451,27 @@ html.no-deco #splash .sp-d{display:none}
 .welcome .wlnav{display:flex;gap:10px;justify-content:space-between;margin-top:8px}
 .welcome .swgrid{grid-template-columns:repeat(6,1fr)}
 .welcome select{width:100%;min-height:44px;border:2px solid var(--line);border-radius:16px;background:var(--surface);padding:0 12px;color:var(--ink)}
+
+/* ===== Responsive: tablet / desktop / landscape ===== */
+@media (min-width:820px),(orientation:landscape) and (max-height:520px) and (min-width:560px){
+  .tabbar{top:0;bottom:0;right:auto;left:0;width:92px;padding:14px 8px;display:flex;align-items:flex-start;background:transparent}
+  .tabbar-in{width:100%;display:flex;flex-direction:column;gap:6px;padding:8px 6px;max-width:none;margin:0;border-radius:28px}
+  .tab{width:100%;min-height:58px}
+  .app{max-width:1120px;margin-left:104px;margin-right:auto;padding-inline:24px;padding-block:8px 40px}
+  .cal2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:start}
+  .cal-l{position:sticky;top:8px}@media (max-height:760px){.cal-l{position:static}}
+  #view[data-tab="more"],#view[data-tab="settings"],#view[data-tab="backup"],#view[data-tab="trash"],#view[data-tab="tasks"],#view[data-tab="search"]{max-width:760px}
+  #view[data-tab="journal"],#view[data-tab="kendo"]{max-width:880px}
+  #ntListBox{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px;align-items:start}
+  #ntListBox>:not(.ncard){grid-column:1/-1}
+  #ntListBox .ncard{margin-bottom:12px}
+  .sheet{top:5vh;bottom:auto;max-width:640px;max-height:90vh;max-height:90dvh;border-radius:30px;border-bottom:2px solid var(--line);animation:none}
+  .welcome .wl{max-width:620px}
+  .swgrid{grid-template-columns:repeat(8,1fr)}
+  #bkBar,#sampleBar{max-width:760px}
+}
+@media (min-width:1280px){.app{max-width:1240px}.cal2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#ntListBox{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (orientation:landscape) and (max-height:520px){.tabbar{width:78px}.app{margin-left:88px}.tab{min-height:46px}.tab{font-size:10px}.top{padding-block:6px 8px}.splash-in{transform:scale(.8)}}
 </style>
 </head>
 <body>
@@ -931,7 +952,7 @@ function vCalendar(){
   const es=by.get(S.sel)||[],ts=tasks().filter(x=>x.due===S.sel);
   const panel=`<section><h2 class="day-h">${esc(L(S.sel,{weekday:'long',day:'numeric',month:'long'}))}</h2>${classPanel(S.sel)}${es.map(entryCard).join('')||'<p class="muted">No entries for this day.</p>'}${ts.length?`<h3 class="day-h">${CHECKSQ}Tasks due</h3>${ts.map(taskRow).join('')}`:''}${gcPanel()}<button class="btn ghost wide" data-action="new" data-date="${S.sel}">Add entry for this day</button></section>`;
   const ttl='<div class="pg-title"><h2>Today</h2><p>'+esc(new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</p></div>';
-  return ttl+nextClassHtml()+head+gcBar()+`<div class="grid">${cells}</div>`+legend+panel+classManage();
+  return ttl+nextClassHtml()+`<div class="cal2"><div class="cal-l">`+head+gcBar()+`<div class="grid">${cells}</div>`+legend+`</div><div class="cal-r">`+panel+classManage()+`</div></div>`;
 }
 
 function taskListHtml(){
@@ -1013,6 +1034,7 @@ function renderBars(){
 }
 function render(){
   renderTabs();renderBars();
+  $('#view').dataset.tab=S.tab;
   $('#view').innerHTML=({journal:vJournal,calendar:vCalendar,tasks:vTasks,kendo:vKendo,notes:vNotes,more:vMore,settings:vSettings,backup:vBackupPage,trash:vTrash,search:vSearch})[S.tab]();
   if(!S.loading&&!S.swChecked){S.swChecked=true;trashPurge();wlCheck()}
   if(S.tab==='calendar')gcEnsure();

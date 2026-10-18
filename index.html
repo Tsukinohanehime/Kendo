@@ -281,6 +281,7 @@ label.field{display:block}
 .tgrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}.tgp{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:99px;border:1.5px solid var(--tc);background:var(--surface);color:var(--ink);font-weight:600;font-size:13px}.tgp i,.tgc i{width:10px;height:10px;border-radius:50%;background:var(--tc);flex:none}.tgp.on{background:var(--tc);color:#fff}.tgp.on i{background:#fff}.tgp b{font-weight:700;opacity:.7;font-size:12px}.tgc{display:inline-flex;align-items:center;gap:5px;padding:2px 9px 2px 7px;border-radius:99px;font-size:12px;font-weight:600;background:var(--surface-2);color:var(--ink)}.tgc i{width:8px;height:8px}.tgd{border-left:4px solid var(--tc)}.tgbar{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;margin:6px 0;scrollbar-width:none}.tgbar::-webkit-scrollbar{display:none}.tgbar .tgp,.tgm{flex:none}.tgm{min-height:36px;padding:0 12px;border-radius:99px;background:transparent;color:var(--ink-2);font-weight:600;font-size:13px;border:1.5px dashed var(--line)}.tgform{margin:8px 0;display:grid;gap:10px}.tgdots{display:flex;flex-wrap:wrap;gap:10px}.tgdot{width:30px;height:30px;border-radius:50%;background:var(--tc);border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--line);padding:0;flex:none}.tgdot.on{box-shadow:0 0 0 3px var(--ink)}.tgmrow{display:grid;grid-template-columns:34px 1fr auto 40px;gap:8px;align-items:center;margin-bottom:8px}.tgn{font-size:12px;color:var(--ink-2);min-width:16px;text-align:center}.tgpal{margin:0 0 12px 42px}.tgconf{padding:10px 12px;border-radius:14px;background:var(--surface-2);margin-bottom:8px}
 .swgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0 14px}.sw{aspect-ratio:1;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--line);display:grid;place-items:center;padding:0}.sw.on{box-shadow:0 0 0 3px var(--ink)}.sw svg{width:22px;height:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
 .mk-c{width:6px;height:6px;border-radius:50%;background:var(--cls);display:inline-block}
+.todaytasks{margin:12px 0 0}.todaytasks .day-h{margin-top:0}.cal2more{margin-top:8px}
 .nextclass{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;margin:12px 0 0;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--cls) 14%,var(--surface));color:var(--ink);border-left:4px solid var(--cls)}.nextclass .nc-l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cls);display:flex;align-items:center;gap:6px}.nextclass .nc-l svg{width:14px;height:14px}.nextclass span:last-child{font-size:14px;color:var(--ink-2)}
 .clrow{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;border-left:4px solid var(--cls);background:var(--surface);box-shadow:var(--shadow);margin-bottom:8px}.clrow.skipped .cltime,.clrow.skipped .clmid{opacity:.55}.cltime{color:var(--cls);font-weight:700;font-size:17px;min-width:54px;display:flex;flex-direction:column}.cltime small{font-size:11px;font-weight:600;color:var(--ink-2)}.clmid{flex:1;min-width:0;display:flex;flex-direction:column}.clmid span,.clmid em{font-size:13px;color:var(--ink-2);font-style:normal}.clrow{flex-wrap:wrap}.clatt{flex-basis:100%;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.clatt .chip{min-height:36px;padding:0 12px;font-size:13px}.clatt .chip.a.on{background:var(--cls);color:var(--bg)}.clatt .chip.x.on{background:var(--danger);color:var(--bg)}.clatt .btn{margin-left:auto}.clitem span+span{display:block}.clflag{display:block;font-size:12px!important;font-weight:700;color:var(--accent)!important}.clflag.bad{color:var(--danger)!important}.clrow.cancel .cltime,.clrow.cancel .clmid b{text-decoration:line-through}.clrow.cancel .cltime,.clrow.cancel .clmid b,.clrow.cancel .clmid span{opacity:.55}.clbtns{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.cldone{font-size:13px;font-weight:700;color:var(--cls)}.day-h svg{width:14px;height:14px;vertical-align:-2px;margin-right:6px}.dh-c{color:var(--cls)}
 .clitem{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;margin-bottom:8px;padding:12px 14px}.clitem span{font-size:13px;color:var(--ink-2)}.clmanage{margin-top:8px}.cldayrow{margin-top:4px}
@@ -455,8 +456,8 @@ html.no-deco #splash .sp-d{display:none}
 
 .when{grid-template-columns:repeat(2,minmax(0,1fr))}.when .field{min-width:0}.when input[type=date],.when input[type=time],.when input[type=text]{min-width:0;width:100%;box-sizing:border-box}
 .cnum.face{position:relative;background:var(--mc);box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}.cnum.face .face{width:30px;height:30px;border-radius:50%;display:block}.cnum.face b{position:absolute;top:-5px;left:-5px;min-width:16px;height:16px;line-height:16px;text-align:center;font-size:10px;font-weight:700;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:9px;padding:0 2px}
-.mk-e{width:7px;height:7px;border-radius:2px;background:#7A5CCF;display:inline-block;transform:rotate(45deg)}
-.dh-e{color:#6a4cc0}.evitem{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;margin-bottom:8px;padding:12px 14px;border-left:6px solid #7A5CCF!important;color:var(--ink)}.evitem span{font-size:13px;color:var(--ink-2)}.evitem .evnote{font-style:italic}
+.mk-e{width:11px;height:11px;background:#F2B705;display:inline-block;clip-path:polygon(50% 0,62% 36%,100% 38%,70% 60%,81% 97%,50% 75%,19% 97%,30% 60%,0 38%,38% 36%)}
+.dh-e svg{color:#F2B705;fill:#F2B705;stroke:#C99400;stroke-width:1.2}.evitem{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;margin-bottom:8px;padding:12px 14px;border-left:6px solid #F2B705!important;color:var(--ink)}.evitem span{font-size:13px;color:var(--ink-2)}.evitem .evnote{font-style:italic}
 .rangebox{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:2px dashed var(--line);border-radius:16px}.rangerow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.rangerow .field{flex:1;min-width:110px}.rangerow select{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);padding:0 10px;color:var(--ink);font:inherit}
 /* ===== Responsive: tablet / desktop / landscape ===== */
 @media (min-width:820px),(orientation:landscape) and (max-height:520px) and (min-width:560px){
@@ -947,6 +948,10 @@ function taskRow(x){
   return `<div class="trow${x.done?' done':''}"><button class="tcheck" role="checkbox" aria-checked="${x.done?'true':'false'}" aria-label="${esc(x.title)}" data-action="toggle-task" data-id="${esc(x.id)}">${CHECK}</button><div class="ttext"><span class="ttitle">${esc(x.title)}</span>${due}</div><button class="tdel" aria-label="Remove ${esc(x.title)}" data-action="del-task" data-id="${esc(x.id)}">${XICON}</button></div>`;
 }
 
+function todayTasksHtml(){
+  const t=todayStr(),ts=tasks().filter(x=>!x.done&&x.due===t);if(!ts.length)return '';
+  return `<section class="todaytasks" aria-label="Tasks due today"><h3 class="day-h">${CHECKSQ}Tasks today</h3>${ts.map(taskRow).join('')}</section>`;
+}
 function vCalendar(){
   if(S.loading)return loadingHtml();
   const y=S.cal.y,m=S.cal.m,t=todayStr();
@@ -966,7 +971,7 @@ function vCalendar(){
   const es=by.get(S.sel)||[],ts=tasks().filter(x=>x.due===S.sel);
   const panel=`<section><h2 class="day-h">${esc(L(S.sel,{weekday:'long',day:'numeric',month:'long'}))}</h2>${eventPanel(S.sel)}${classPanel(S.sel)}${es.map(entryCard).join('')||'<p class="muted">No entries for this day.</p>'}${ts.length?`<h3 class="day-h">${CHECKSQ}Tasks due</h3>${ts.map(taskRow).join('')}`:''}${gcPanel()}<button class="btn ghost wide" data-action="new" data-date="${S.sel}">Add entry for this day</button></section>`;
   const ttl='<div class="pg-title"><h2>Today</h2><p>'+esc(new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</p></div>';
-  return ttl+nextClassHtml()+`<div class="cal2"><div class="cal-l">`+head+gcBar()+`<div class="grid">${cells}</div>`+legend+`</div><div class="cal-r">`+panel+eventManage()+classManage()+`</div></div>`;
+  return ttl+todayTasksHtml()+nextClassHtml()+`<div class="cal2"><div class="cal-l">`+head+gcBar()+`<div class="grid">${cells}</div>`+legend+`</div><div class="cal-r">`+panel+`</div></div>`;
 }
 
 function taskListHtml(){
@@ -1161,7 +1166,7 @@ function sheetHtml(editing){
       <label class="field"><span class="lbl">Work on next time</span><textarea id="kNext" rows="2"></textarea></label>
     </section>
     <label class="field"><span class="lbl">Note</span><textarea id="fNote" rows="3" placeholder="Anything worth remembering?"></textarea></label>
-    <fieldset><legend>Tags</legend><div id="tagBox"></div></fieldset>
+    <fieldset id="tagSec"><legend>Tags</legend><div id="tagBox"></div></fieldset>
     <fieldset><legend>Photos</legend><div class="photos" id="photoList"></div><div id="photoDrive"></div><p class="hint">Photos are shrunk a little so lots of them fit on your phone.</p></fieldset>
     <fieldset><legend>Video links</legend><div id="videoBox"></div></fieldset>
     <p class="err" id="sheetErr" role="alert" hidden></p>
@@ -1175,6 +1180,7 @@ function syncSheet(){
   r.querySelectorAll('[data-action="act"]').forEach(b=>setOn(b,d.acts.includes(b.dataset.name)));
   const ty=d.type;
   $('#kSec').hidden=ty==='nichijo';$('#actSec').hidden=ty!=='nichijo';
+  const tgs=$('#tagSec');if(tgs)tgs.hidden=!(ty==='nichijo'||d.tgKeep);
   r.querySelectorAll('[data-for]').forEach(el=>{el.hidden=el.dataset.for!==ty});
   r.querySelectorAll('.tbtn').forEach(b=>{const on=b.dataset.v===ty;b.classList.toggle('on',on);b.setAttribute('aria-checked',on?'true':'false')});
   $('#kTitle').textContent=ty==='jishuren'?'Self-practice details':'Keiko details';
@@ -1216,7 +1222,7 @@ function openSheet(id,date,type){
     acts:src?(src.acts||[]).filter(a=>a!==KENDO):[],
     place:src?(src.place||''):'',photos:src?[...(src.photos||[])]:[],orig:src?[...(src.photos||[])]:[],newImgs:{},
     note:src?(src.note||''):'',
-    videos:src?[...(src.videos||[])]:[],tags:src?[...(src.tags||[])]:[],
+    videos:src?[...(src.videos||[])]:[],tags:src?[...(src.tags||[])]:[],tgKeep:!!(src&&(src.tags||[]).length),
     k:Object.assign({},k0,sk,{focus:[...(sk.focus||[])],repsBy:Object.assign({},sk.repsBy||{})})
   };
   S.draft=d;S.fedit=false;S.tg=null;S.lastFocus=document.activeElement;
@@ -1242,7 +1248,7 @@ function saveDraft(){
   const isK=d.type!=='nichijo';
   const item={kind:'entry',id:d.id||newId('e'),date:d.date||todayStr(),time:d.time||'12:00',type:d.type,mood:d.mood,acts:d.acts,note:d.note.trim(),
     kendo:isK?{min:Math.max(0,Math.min(480,+d.k.min||0)),focus:d.k.focus,feel:d.k.feel,where:d.type==='keiko'?d.k.where.trim():'',reps:(repsSum(d.k)||Math.max(0,Math.min(99999,+d.k.reps||0))),repsBy:Object.fromEntries(d.k.focus.filter(f=>+(d.k.repsBy||{})[f]>0).map(f=>[f,+d.k.repsBy[f]])),good:d.k.good.trim(),next:d.k.next.trim()}:null,
-    place:d.place.trim(),photos:d.photos,videos:d.videos.map(u=>u.trim()).filter(u=>/^https?:\/\/\S+$/i.test(u)).slice(0,3),tags:(d.tags||[]).filter(id=>tagOf(id)),ts:d.ts||Date.now()};
+    place:d.place.trim(),photos:d.photos,videos:d.videos.map(u=>u.trim()).filter(u=>/^https?:\/\/\S+$/i.test(u)).slice(0,3),tags:(d.type==='nichijo'||d.tgKeep)?(d.tags||[]).filter(id=>tagOf(id)):[],ts:d.ts||Date.now()};
   const badL=d.videos.filter(u=>u.trim()&&!/^https?:\/\/\S+$/i.test(u.trim())).length;
   closeSheet(true);persist(item,d);toast(badL?'Saved. '+badL+' video link'+(badL===1?' was':'s were')+"n't a web address and was left out.":'Saved');
 }
@@ -2150,7 +2156,7 @@ function calMove(d){
 /* ---------- class schedule ---------- */
 const classes=()=>[...S.items.values()].filter(x=>x.kind==='class'&&!x.deletedAt);
 const CL_ORDER=[1,2,3,4,5,6,0],DOWN3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const EVICON='<svg class="cli" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16v11H4zM8 4v4M16 4v4M4 12h16"/></svg>';
+const EVICON='<svg class="cli" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17.4l-6.1 3.5 1.5-6.8L2.2 9.5l6.9-.7z" stroke-linejoin="round"/></svg>';
 function clTime(c,ds){
   if(c.repeat==='once')return c.date===ds?c.time:null;
   if(c.start&&ds<c.start)return null;if(c.until&&ds>c.until)return null;
@@ -2498,13 +2504,14 @@ function vMore(){
   return '<div class="pg-title"><h2>More</h2><p>Everything else, in one place.</p></div>'
     +row('tab','data-tab="tasks"',I('<rect x="4" y="4" width="16" height="16" rx="4"/><path d="m8.5 12.2 2.5 2.5 4.5-5"/>'),'Tasks','Things to do, with dates',open?open+' open':'')
     +row('tab','data-tab="search"',I('<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/>'),'Search','Find logs, notes, tasks and classes')
-    +row('tg-manage','',I('<path d="M4 12V5h7l9 9-7 7-9-9z"/><circle cx="8" cy="9" r="1.3"/>'),'Tags','Colours to sort logs and notes')
+    +row('tg-manage','',I('<path d="M4 12V5h7l9 9-7 7-9-9z"/><circle cx="8" cy="9" r="1.3"/>'),'Tags','Colours to sort Nichijō logs and notes')
     +row('cl-new','',I('<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>'),'Add a class','Weekly dojo schedule and attendance')
     +row('ev-new','',I('<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M8 14h8"/>'),'Add an event','Tournaments, seminars, trips — one day or a range')
     +row('tab','data-tab="settings"',I('<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/>'),'Settings','Journal name, colours, faces, decorations')
     +row('tab','data-tab="backup"',I('<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/>'),'Backup Center','Protect your journal and move it between devices',due?'Due':'')
     +row('tab','data-tab="trash"',I('<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>'),'Trash','Deleted items wait here for 30 days',tn?String(tn):'')
     +row('wl-open','',I('<path d="M12 4l2 5 5 .5-3.8 3.4 1.2 5.1L12 15.4 7.6 18l1.2-5.1L5 9.5 10 9z"/>'),'Welcome tour','Replay the set-up steps (your data is not touched)')
+    +'<div class="cal2more">'+classManage()+eventManage()+'</div>'
     +'<p class="foot">Saved on this device only. Nothing is uploaded.</p>';
 }
 function vSettings(){

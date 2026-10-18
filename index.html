@@ -151,6 +151,8 @@ textarea{resize:vertical;min-height:72px;line-height:1.4}
 .mk-t{width:7px;height:7px;border-radius:2px;border:1.5px solid var(--ink-2);box-sizing:border-box}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink-2);margin:10px 4px 0;align-items:center}
 .legend span{display:inline-flex;align-items:center;gap:6px}
+.legend.lg-m,.legend.lg-s{flex-wrap:nowrap;justify-content:space-between;gap:4px 8px;font-size:11.5px}.legend.lg-m span,.legend.lg-s span{gap:5px;white-space:nowrap}.legend.lg-s{margin-top:8px}.legend.lg-s:has(.mk-g){flex-wrap:wrap;justify-content:flex-start;gap:6px 12px}
+.lgf{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--mc);overflow:hidden;flex:none}.lgf .face{width:20px;height:20px;border-radius:50%;display:block}.lgc{width:12px;height:12px;border-radius:50%;background:var(--mc);flex:none}
 
 /* tasks */
 .addtask{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:4px}
@@ -967,7 +969,8 @@ function vCalendar(){
   }
   const label=new Date(y,m,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
   const head=`<div class="calhead"><button class="iconbtn" data-action="cal-prev" aria-label="Previous month">${LEFT}</button><h2>${esc(label)}</h2><div class="cal-tools"><button class="btn ghost small" data-action="cal-today">Today</button><button class="iconbtn" data-action="cal-next" aria-label="Next month">${RIGHT}</button></div></div>`;
-  const legend='<div class="legend"><span>Face or colour = mood</span><span><i class="mk-k"></i> Keiko</span><span><i class="mk-j"></i> Jishuren</span><span><i class="mk-t"></i> Task due</span><span><i class="mk-c"></i> Class</span><span><i class="mk-e"></i> Event</span>'+(gcalDoc().show?'<span><i class="mk-g"></i> Google event</span>':'')+'</div>';
+  const lg1='<div class="legend lg-m" aria-label="Moods">'+[5,4,3,2,1].map(m=>`<span>${calFaces?`<i class="lgf m${m}">${face(m)}</i>`:`<i class="lgc m${m}"></i>`}${MN[m]}</span>`).join('')+'</div>';
+  const legend=lg1+'<div class="legend lg-s"><span><i class="mk-k"></i> Keiko</span><span><i class="mk-j"></i> Jishuren</span><span><i class="mk-t"></i> Task due</span><span><i class="mk-c"></i> Class</span><span><i class="mk-e"></i> Event</span>'+(gcalDoc().show?'<span><i class="mk-g"></i> Google</span>':'')+'</div>';
   const es=by.get(S.sel)||[],ts=tasks().filter(x=>x.due===S.sel);
   const panel=`<section><h2 class="day-h">${esc(L(S.sel,{weekday:'long',day:'numeric',month:'long'}))}</h2>${eventPanel(S.sel)}${classPanel(S.sel)}${es.map(entryCard).join('')||'<p class="muted">No entries for this day.</p>'}${ts.length?`<h3 class="day-h">${CHECKSQ}Tasks due</h3>${ts.map(taskRow).join('')}`:''}${gcPanel()}<button class="btn ghost wide" data-action="new" data-date="${S.sel}">Add entry for this day</button></section>`;
   const ttl='<div class="pg-title"><h2>Today</h2><p>'+esc(new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</p></div>';
@@ -1817,6 +1820,7 @@ function thHtml(){
   return nmHtml()+'<h3 class="bk-h">Appearance</h3><div class="chips">'+md+'</div>'
     +'<h3 class="bk-h">Decorations</h3><div class="chips"><button type="button" class="chip'+(decoOn?' on':'')+'" aria-pressed="'+decoOn+'" data-action="deco-toggle">Sparkles, tape and dots: '+(decoOn?'on':'off')+'</button></div><p class="bk-small">Turn off for a plainer, calmer look.</p>'
     +'<h3 class="bk-h">Calendar</h3><div class="chips"><button type="button" class="chip'+(calFaces?' on':'')+'" aria-pressed="'+calFaces+'" data-action="cal-faces">Mood faces on days: '+(calFaces?'on':'off')+'</button></div><p class="bk-small">Shows your mood face on each day that has a log. Off shows colours only.</p>'
+    +remHtml()
     +'<h3 class="bk-h">Colour · '+esc(cur.n)+(cur.c[1]?' (two-tone)':'')+'</h3><div class="swgrid">'+sw(0,20)+'</div>'
     +'<h3 class="bk-h">Two-tone</h3><div class="swgrid">'+sw(20,32)+'</div>'
     +fpHtml()
@@ -1854,6 +1858,35 @@ function closeTheme(){
 }
 S.tab=routeFromHash();
 let decoOn=true;try{decoOn=localStorage.getItem('kj-deco')!=='0'}catch(e){}
+let rem={on:false,time:'09:00'};try{const r=JSON.parse(localStorage.getItem('kj-rem')||'null');if(r&&typeof r==='object')rem=Object.assign(rem,{on:!!r.on,time:/^\d\d:\d\d$/.test(r.time||'')?r.time:'09:00'})}catch(e){}
+const remSave=()=>{try{localStorage.setItem('kj-rem',JSON.stringify(rem))}catch(e){}};
+const remPerm=()=>{try{return 'Notification' in window?Notification.permission:'unsupported'}catch(e){return 'unsupported'}};
+async function remShow(title,body){
+  if(remPerm()!=='granted')return false;
+  try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
+    if(reg&&reg.showNotification){await reg.showNotification(title,{body,icon:'icon-192.png',badge:'icon-192.png',tag:'kj-tasks'});return true}
+    new Notification(title,{body,icon:'icon-192.png'});return true}catch(e){return false}
+}
+function remCheck(){
+  if(!rem.on||S.loading)return;
+  const t=todayStr(),n=new Date(),hm=pad(n.getHours())+':'+pad(n.getMinutes());
+  let last='';try{last=localStorage.getItem('kj-rem-last')||''}catch(e){}
+  if(last===t||hm<rem.time)return;
+  const ts=tasks().filter(x=>!x.done&&x.due===t);if(!ts.length)return;
+  try{localStorage.setItem('kj-rem-last',t)}catch(e){}
+  const title=ts.length===1?'Task due today':ts.length+' tasks due today',body=ts.slice(0,3).map(x=>x.title).join(', ')+(ts.length>3?' +'+(ts.length-3)+' more':'');
+  remShow(title,body).then(ok=>{if(!ok)toast(title+': '+body)});
+}
+function tasksIcs(){
+  const ts=tasks().filter(x=>!x.done&&x.due);if(!ts.length){toast('No open tasks with a due date');return}
+  const q=v=>String(v).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
+  const st=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',hm=(rem.time||'09:00').replace(':','')+'00';
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Keiko Journal//Tasks//EN','CALSCALE:GREGORIAN'];
+  ts.forEach(x=>{L.push('BEGIN:VEVENT','UID:'+x.id+'@keiko-journal','DTSTAMP:'+st,'DTSTART:'+x.due.replace(/-/g,'')+'T'+hm,'DURATION:PT15M','SUMMARY:'+q('Task: '+x.title),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+q(x.title),'TRIGGER:PT0S','END:VALARM','END:VEVENT')});
+  L.push('END:VCALENDAR');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([L.join('\r\n')+'\r\n'],{type:'text/calendar'}));a.download='keiko-tasks.ics';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+  toast(ts.length+' task'+(ts.length===1?'':'s')+' exported');
+}
 let calFaces=true;try{calFaces=localStorage.getItem('kj-calfaces')!=='0'}catch(e){}
 function decoApply(){document.documentElement.classList.toggle('no-deco',!decoOn)}
 decoApply();
@@ -2514,6 +2547,12 @@ function vMore(){
     +'<div class="cal2more">'+classManage()+eventManage()+'</div>'
     +'<p class="foot">Saved on this device only. Nothing is uploaded.</p>';
 }
+function remHtml(){
+  const pm=remPerm(),msg=pm==='granted'?'Notifications are allowed. Your phone shows the reminder while the app is open or running in the background. If the app is fully closed, you see it the next time you open the app.':pm==='denied'?'Notifications are blocked for this app in your phone settings, so you will see a message inside the app instead.':pm==='unsupported'?'This browser cannot show notifications, so you will see a message inside the app instead.':'Turning this on asks your phone for permission to show notifications.';
+  return '<h3 class="bk-h">Task reminders</h3><div class="chips"><button type="button" class="chip'+(rem.on?' on':'')+'" aria-pressed="'+rem.on+'" data-action="rem-toggle">Remind me on the day: '+(rem.on?'on':'off')+'</button></div>'
+    +(rem.on?'<label class="field" style="margin-top:10px"><span class="lbl">Remind me at</span><input type="time" id="remTime" value="'+esc(rem.time)+'"></label><div class="chips" style="margin-top:8px"><button type="button" class="chip" data-action="rem-test">Send a test</button></div>':'')
+    +'<p class="bk-small">'+msg+'</p><div class="chips"><button type="button" class="chip" data-action="tasks-ics">Export open tasks to phone calendar (.ics)</button></div><p class="bk-small">Opens in your calendar app as events at the time above on each due date. Whether the calendar app alerts you depends on its own settings. I have not tested this on a phone.</p>';
+}
 function vSettings(){
   if(S.loading)return loadingHtml();
   return '<div class="pg-title"><h2>Settings</h2><p>Make it feel like yours.</p></div><div id="thBody">'+thHtml()+'</div>';
@@ -2724,6 +2763,14 @@ document.addEventListener('click',ev=>{
     case 'cl-att':clAtt(b.dataset.id,b.dataset.date,b.dataset.v);break;
     case 'open-theme':openTheme();break;
     case 'close-theme':closeTheme();break;
+    case 'rem-toggle':{
+      if(!rem.on){rem.on=true;remSave();{const n=new Date();if(rem.time<=pad(n.getHours())+':'+pad(n.getMinutes())){try{localStorage.setItem('kj-rem-last',todayStr())}catch(e){}}}render();renderTheme();
+        if(remPerm()==='default'){try{Promise.resolve(Notification.requestPermission()).then(()=>{renderTheme();remCheck()},()=>remCheck())}catch(e){remCheck()}}
+        else remCheck()}
+      else{rem.on=false;remSave();render();renderTheme()}
+      break}
+    case 'rem-test':remShow('Keiko Journal','Reminders are working.').then(ok=>{if(!ok)toast('Reminders are working (shown inside the app)')});break;
+    case 'tasks-ics':tasksIcs();break;
     case 'cal-faces':calFaces=!calFaces;try{localStorage.setItem('kj-calfaces',calFaces?'1':'0')}catch(e){}render();renderTheme();break;
     case 'deco-toggle':decoOn=!decoOn;try{localStorage.setItem('kj-deco',decoOn?'1':'0')}catch(e){}decoApply();renderTheme();break;
     case 'th-mode':thSel.mode=b.dataset.v;thSave();thApply();renderTheme();break;
@@ -2792,10 +2839,10 @@ document.addEventListener('input',ev=>{
     case 'kNext':d.k.next=t.value;break;
   }
 });
-setInterval(()=>{if(S.draft)draftStash()},1500);document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.draft)draftStash()});window.addEventListener('pagehide',()=>{if(S.draft)draftStash()});
+setInterval(()=>{if(S.draft)draftStash()},1500);setInterval(remCheck,60000);setTimeout(remCheck,4000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)remCheck()});document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.draft)draftStash()});window.addEventListener('pagehide',()=>{if(S.draft)draftStash()});
 document.addEventListener('error',ev=>{const t=ev.target;if(t&&t.classList&&t.classList.contains('vth'))t.remove()},true);
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){const m=$('#qaMenu');if(m&&!m.hidden){qaClose();const tb=document.querySelector('[data-action="qa-toggle"]');if(tb)tb.focus();return}}if(ev.key==='Enter'&&ev.target&&ev.target.id==='tgName'&&S.tg){ev.preventDefault();tgAdd(S.tg.ctx);return}if(ev.key==='Escape'){if(!$('#lightbox').hidden)closeLightbox();else if(!$('#tgRoot').hidden){closeTgm();render()}else if(!$('#lkRoot').hidden)closeLk();else if(!$('#exRoot').hidden)closeEx();else if(!$('#bkRoot').hidden)closeBackup();else if(!$('#thRoot').hidden)closeTheme();else if(!$('#clRoot').hidden)closeClass();else if(!$('#evRoot').hidden)closeEvent();else if(S.nd)closeNote(true);else if(S.draft)closeSheet()}});
-document.addEventListener('change',ev=>{const t=ev.target;if(t.id==='impFile'){importFile(t.files[0]);t.value='';return}if(t.id==='bkRemind'||t.id==='wlRemind'){LS_SET('kj-bk-remind',t.value);renderBars();return}if(t.id==='bkAuto'){setAuto(t.checked);return}if(t.id==='gcShow'){setGcal({show:t.checked});S.gerr='';S.gev={};render();renderBackup();return}if(t.id==='gcTasks'||t.id==='gcSess'){setGcal(t.id==='gcTasks'?{outTasks:t.checked}:{outSessions:t.checked});runCalSync(true);return}if(t.dataset&&t.dataset.tgname!==undefined){const g=tagOf(t.dataset.tgname),nm=t.value.trim();if(g&&nm&&nm!==g.name)put(Object.assign({},g,{name:nm}));else if(g&&!nm)t.value=g.name;return}if(t.id==='ntPhotos'){const fs=[...t.files];t.value='';if(fs.length)addNtPhotos(fs);return}if(t.id==='fpFile'){const f=t.files[0];t.value='';fpPick(f);return}if(t.id==='fPhotos'){const fs=[...t.files];t.value='';if(fs.length)addPhotos(fs)}});
+document.addEventListener('change',ev=>{const t=ev.target;if(t.id==='impFile'){importFile(t.files[0]);t.value='';return}if(t.id==='remTime'){rem.time=/^\d\d:\d\d$/.test(t.value)?t.value:'09:00';remSave();{const n=new Date();if(rem.time>pad(n.getHours())+':'+pad(n.getMinutes())){try{localStorage.removeItem('kj-rem-last')}catch(e){}}}remCheck();return}if(t.id==='bkRemind'||t.id==='wlRemind'){LS_SET('kj-bk-remind',t.value);renderBars();return}if(t.id==='bkAuto'){setAuto(t.checked);return}if(t.id==='gcShow'){setGcal({show:t.checked});S.gerr='';S.gev={};render();renderBackup();return}if(t.id==='gcTasks'||t.id==='gcSess'){setGcal(t.id==='gcTasks'?{outTasks:t.checked}:{outSessions:t.checked});runCalSync(true);return}if(t.dataset&&t.dataset.tgname!==undefined){const g=tagOf(t.dataset.tgname),nm=t.value.trim();if(g&&nm&&nm!==g.name)put(Object.assign({},g,{name:nm}));else if(g&&!nm)t.value=g.name;return}if(t.id==='ntPhotos'){const fs=[...t.files];t.value='';if(fs.length)addNtPhotos(fs);return}if(t.id==='fpFile'){const f=t.files[0];t.value='';fpPick(f);return}if(t.id==='fPhotos'){const fs=[...t.files];t.value='';if(fs.length)addPhotos(fs)}});
 
 /* ---------- start ---------- */
 (function(){const t=todayStr(),dt=parse(t);S.sel=t;S.cal={y:dt.getFullYear(),m:dt.getMonth()}})();

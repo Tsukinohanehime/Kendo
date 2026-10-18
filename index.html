@@ -452,6 +452,11 @@ html.no-deco #splash .sp-d{display:none}
 .welcome .swgrid{grid-template-columns:repeat(6,1fr)}
 .welcome select{width:100%;min-height:44px;border:2px solid var(--line);border-radius:16px;background:var(--surface);padding:0 12px;color:var(--ink)}
 
+
+.when{grid-template-columns:repeat(2,minmax(0,1fr))}.when .field{min-width:0}.when input[type=date],.when input[type=time],.when input[type=text]{min-width:0;width:100%;box-sizing:border-box}
+.mk-e{width:7px;height:7px;border-radius:2px;background:#7A5CCF;display:inline-block;transform:rotate(45deg)}
+.dh-e{color:#6a4cc0}.evitem{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;margin-bottom:8px;padding:12px 14px;border-left:6px solid #7A5CCF!important;color:var(--ink)}.evitem span{font-size:13px;color:var(--ink-2)}.evitem .evnote{font-style:italic}
+.rangebox{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:2px dashed var(--line);border-radius:16px}.rangerow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.rangerow .field{flex:1;min-width:110px}.rangerow select{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);padding:0 10px;color:var(--ink);font:inherit}
 /* ===== Responsive: tablet / desktop / landscape ===== */
 @media (min-width:820px),(orientation:landscape) and (max-height:520px) and (min-width:560px){
   .tabbar{top:0;bottom:0;right:auto;left:0;width:92px;padding:14px 8px;display:flex;align-items:flex-start;background:transparent}
@@ -492,6 +497,7 @@ html.no-deco #splash .sp-d{display:none}
       <button role="menuitem" data-action="nt-new">Note</button>
       <button role="menuitem" data-action="qa-task">Task</button>
       <button role="menuitem" data-action="cl-new">Class</button>
+      <button role="menuitem" data-action="ev-new">Event</button>
     </div>
   </header>
   <div id="bkBar"></div>
@@ -515,6 +521,7 @@ html.no-deco #splash .sp-d{display:none}
 <div class="sheet-root" id="bkRoot" hidden></div>
 <div class="sheet-root" id="thRoot" hidden></div>
 <div class="sheet-root" id="clRoot" hidden></div>
+<div class="sheet-root" id="evRoot" hidden></div>
 <div class="sheet-root" id="ntRoot" hidden></div>
 <div class="sheet-root" id="exRoot" hidden></div>
 <div class="sheet-root" id="tgRoot" hidden></div>
@@ -638,7 +645,7 @@ async function initStore(){
    Restore rules: only records whose id is missing are added; existing records are never overwritten or removed;
    the "cfg" record is merged (custom activities and focus lists are unioned); locked notes are skipped when this
    phone already has a different lock code; invalid records are rejected and listed. All adds happen in one transaction. */
-const LASTEXP='kj-last-export',BK_KINDS=['entry','task','cfg','img','class','note','lock','tag'],SCHEMA=2;
+const LASTEXP='kj-last-export',BK_KINDS=['entry','task','cfg','img','class','note','lock','tag','event'],SCHEMA=2;
 const lastExp=()=>{try{return +localStorage.getItem(LASTEXP)||0}catch(e){return 0}};
 const markExp=()=>{try{localStorage.setItem(LASTEXP,String(Date.now()))}catch(e){}};
 function backupNudge(){
@@ -703,6 +710,7 @@ function bkCheck(x){
     case 'task':if(!isStr(x.title))return 'no title';if(x.due&&!DATE_RE.test(x.due))return 'bad due date';break;
     case 'img':if(!(isStr(x.data)&&/^data:image\//.test(x.data))&&!isObj(x.enc))return 'bad image';break;
     case 'class':if(!isStr(x.title))return 'no title';break;
+    case 'event':if(!isStr(x.title))return 'no title';if(!DATE_RE.test(x.start||''))return 'bad start date';if(x.end&&!DATE_RE.test(x.end))return 'bad end date';break;
     case 'note':if(x.locked){if(!isObj(x.enc))return 'locked note without data'}else if(!isStr(x.title||'')||!isStr(x.body||''))return 'bad text';break;
     case 'lock':if(!isStr(x.salt)||!isStr(x.chk))return 'bad lock';break;
     case 'tag':if(!isStr(x.name)||!x.name)return 'no name';break;
@@ -811,6 +819,7 @@ function csvExport(kind){
   const tn=ids=>tagList(ids||[]).map(t=>t.name).join('; '),d=todayStr();let rows,name;
   if(kind==='logs'){name='keiko-logs-'+d+'.csv';rows=[['Date','Time','Type','Mood','Place','Activities','Tags','Minutes','Focus','Reps','Feel (1-5)','Where','Went well','Work on next','Note']].concat(entries().filter(e=>!e.sample).map(e=>{const k=e.kendo||{};return [e.date,e.time,(TYPES[T(e)]||{}).n||'',FP_NAMES[e.mood]||e.mood,e.place||'',(e.acts||[]).join('; '),tn(e.tags),k.min||'',(k.focus||[]).join('; '),k.reps||'',k.feel||'',k.where||'',k.good||'',k.next||'',e.note||'']}))}
   else if(kind==='tasks'){name='keiko-tasks-'+d+'.csv';rows=[['Task','Due','Done']].concat(tasks().filter(x=>!x.sample).map(x=>[x.title,x.due||'',x.done?'yes':'no']))}
+  else if(kind==='events'){name='keiko-events-'+d+'.csv';rows=[['Event','Starts','Ends','Time','Place','Note']].concat(events().map(x=>[x.title,x.start,evEnd(x),x.time||'',x.place||'',x.note||'']))}
   else if(kind==='notes'){name='keiko-notes-'+d+'.csv';rows=[['Date','Title','Note','Tags','Pinned']].concat(notes().map(n=>[n.date||'',n.title||'',n.body||'',tn(n.tags),n.pin?'yes':'']))}
   else{name='keiko-class-attendance-'+d+'.csv';rows=[['Class','Date','Status']];classes().forEach(c=>Object.keys(c.att||{}).sort().forEach(ds=>rows.push([c.title,ds,c.att[ds]==='a'?'Attended':'Absent'])))}
   csvSave(name,rows);
@@ -874,7 +883,7 @@ function fileBkHtml(){
     +(safes.length?safes.map(x=>`<div class="kv"><span>${esc(fm(x.ts))} · ${x.count} items</span><span><button class="link" data-action="bkf-safety-restore" data-id="${esc(x.id)}">Review</button> · <button class="link" data-action="bkf-safety-del" data-id="${esc(x.id)}">Delete</button></span></div>`).join(''):'<p>No safety copies yet.</p>'))
   +card('Backup reminders','<label for="bkRemind" class="bk-small">Remind me</label><select id="bkRemind">'+[['0','Never'],['7','After 7 days'],['14','After 14 days'],['30','After 30 days']].map(o=>`<option value="${o[0]}"${rem===o[0]?' selected':''}>${o[1]}</option>`).join('')+'</select><p class="bk-small">A gentle banner appears when your last backup download is older than this. Reminders show inside the app only when you open it. They are not notifications.</p>')
   +card('Storage health',`<div class="kv"><span>Protected from automatic clean-up</span><b>${esc(pers)}</b></div>`+(st.usage!=null?`<div class="kv"><span>Space used by this app</span><b>${esc(fmtB(st.usage))}${st.quota?' of about '+esc(fmtB(st.quota)):''}</b></div>`:'')+'<p class="bk-small">Browsers give estimates only. Protected storage only reduces automatic clean-up by the browser. It does not protect against clearing site data, a lost or broken phone, or a reset.</p><button class="btn ghost" data-action="bkf-persist">Ask the browser to protect my data</button>')
-  +card('Export as CSV','<p>Spreadsheet files for reading or your own records. They cannot be restored, so use a full backup for that.</p><div class="btnrow"><button class="btn ghost" data-action="bkf-csv" data-k="logs">Logs</button><button class="btn ghost" data-action="bkf-csv" data-k="tasks">Tasks</button><button class="btn ghost" data-action="bkf-csv" data-k="notes">Notes</button><button class="btn ghost" data-action="bkf-csv" data-k="att">Attendance</button></div><p class="bk-small">Locked notes are never exported.</p>')
+  +card('Export as CSV','<p>Spreadsheet files for reading or your own records. They cannot be restored, so use a full backup for that.</p><div class="btnrow"><button class="btn ghost" data-action="bkf-csv" data-k="logs">Logs</button><button class="btn ghost" data-action="bkf-csv" data-k="tasks">Tasks</button><button class="btn ghost" data-action="bkf-csv" data-k="notes">Notes</button><button class="btn ghost" data-action="bkf-csv" data-k="events">Events</button><button class="btn ghost" data-action="bkf-csv" data-k="att">Attendance</button></div><p class="bk-small">Locked notes are never exported.</p>')
   +card('Recent backup activity',log.length?'<ul class="bklog">'+log.map(x=>`<li><span>${esc(x.m)}</span><span>${esc(fm(x.t))}</span></li>`).join('')+'</ul><p class="bk-small">“Download started” means the browser was asked to save the file. We cannot see whether it was kept.</p>':'<p>No activity yet.</p>')
   +card('If your data disappears','<ol><li>Open this app at the same web address you used before.</li><li>Go to More → Backup Center → “Choose backup file”.</li><li>Pick your most recent backup file and review the preview.</li><li>Choose “Add what is missing” for an empty or new phone, then confirm.</li><li>No backup file? Check your Downloads folder, cloud drive and email for files named “keiko-journal-backup-….json”. Without a copy outside the browser, erased data can’t be recovered.</li></ol><p class="note">To move to a new phone: download a backup here, open the app on the new phone, and restore it there.</p>');
 }
@@ -947,16 +956,16 @@ function vCalendar(){
   for(let i=0;i<lead;i++)cells+='<span aria-hidden="true"></span>';
   for(let d=1;d<=dim;d++){
     const ds=y+'-'+pad(m+1)+'-'+pad(d),es=by.get(ds)||[],mood=avgMood(es);
-    const hasK=es.some(e=>T(e)==='keiko'),hasJ=es.some(e=>T(e)==='jishuren'),hasT=due.has(ds),hasC=classesOn(ds).some(x=>!x.skipped&&!x.off),hasG=!!(gb&&gb[ds]&&gb[ds].length);
-    cells+=`<button class="cell${ds===t?' today':''}${ds===S.sel?' sel':''}" data-action="pick-day" data-date="${ds}" aria-label="${d} ${esc(L(ds,{month:'long'}))}, ${mood?MN[mood]:'no entries'}${hasK?', keiko':''}${hasJ?', jishuren':''}${hasG?', Google event':''}${hasT?', task due':''}${hasC?', class':''}"><span class="cnum${mood?' has m'+mood:''}">${d}</span><span class="marks">${hasK?'<i class="mk-k"></i>':''}${hasJ?'<i class="mk-j"></i>':''}${hasG?'<i class="mk-g"></i>':''}${hasT?'<i class="mk-t"></i>':''}${hasC?'<i class="mk-c"></i>':''}</span></button>`;
+    const hasK=es.some(e=>T(e)==='keiko'),hasJ=es.some(e=>T(e)==='jishuren'),hasT=due.has(ds),hasC=classesOn(ds).some(x=>!x.skipped&&!x.off),hasE=evOn(ds).length>0,hasG=!!(gb&&gb[ds]&&gb[ds].length);
+    cells+=`<button class="cell${ds===t?' today':''}${ds===S.sel?' sel':''}" data-action="pick-day" data-date="${ds}" aria-label="${d} ${esc(L(ds,{month:'long'}))}, ${mood?MN[mood]:'no entries'}${hasK?', keiko':''}${hasJ?', jishuren':''}${hasG?', Google event':''}${hasT?', task due':''}${hasC?', class':''}${hasE?', event':''}"><span class="cnum${mood?' has m'+mood:''}">${d}</span><span class="marks">${hasK?'<i class="mk-k"></i>':''}${hasJ?'<i class="mk-j"></i>':''}${hasG?'<i class="mk-g"></i>':''}${hasT?'<i class="mk-t"></i>':''}${hasC?'<i class="mk-c"></i>':''}${hasE?'<i class="mk-e"></i>':''}</span></button>`;
   }
   const label=new Date(y,m,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
   const head=`<div class="calhead"><button class="iconbtn" data-action="cal-prev" aria-label="Previous month">${LEFT}</button><h2>${esc(label)}</h2><div class="cal-tools"><button class="btn ghost small" data-action="cal-today">Today</button><button class="iconbtn" data-action="cal-next" aria-label="Next month">${RIGHT}</button></div></div>`;
-  const legend='<div class="legend"><span>Colored day = mood</span><span><i class="mk-k"></i> Keiko</span><span><i class="mk-j"></i> Jishuren</span><span><i class="mk-t"></i> Task due</span><span><i class="mk-c"></i> Class</span>'+(gcalDoc().show?'<span><i class="mk-g"></i> Google event</span>':'')+'</div>';
+  const legend='<div class="legend"><span>Colored day = mood</span><span><i class="mk-k"></i> Keiko</span><span><i class="mk-j"></i> Jishuren</span><span><i class="mk-t"></i> Task due</span><span><i class="mk-c"></i> Class</span><span><i class="mk-e"></i> Event</span>'+(gcalDoc().show?'<span><i class="mk-g"></i> Google event</span>':'')+'</div>';
   const es=by.get(S.sel)||[],ts=tasks().filter(x=>x.due===S.sel);
-  const panel=`<section><h2 class="day-h">${esc(L(S.sel,{weekday:'long',day:'numeric',month:'long'}))}</h2>${classPanel(S.sel)}${es.map(entryCard).join('')||'<p class="muted">No entries for this day.</p>'}${ts.length?`<h3 class="day-h">${CHECKSQ}Tasks due</h3>${ts.map(taskRow).join('')}`:''}${gcPanel()}<button class="btn ghost wide" data-action="new" data-date="${S.sel}">Add entry for this day</button></section>`;
+  const panel=`<section><h2 class="day-h">${esc(L(S.sel,{weekday:'long',day:'numeric',month:'long'}))}</h2>${eventPanel(S.sel)}${classPanel(S.sel)}${es.map(entryCard).join('')||'<p class="muted">No entries for this day.</p>'}${ts.length?`<h3 class="day-h">${CHECKSQ}Tasks due</h3>${ts.map(taskRow).join('')}`:''}${gcPanel()}<button class="btn ghost wide" data-action="new" data-date="${S.sel}">Add entry for this day</button></section>`;
   const ttl='<div class="pg-title"><h2>Today</h2><p>'+esc(new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</p></div>';
-  return ttl+nextClassHtml()+`<div class="cal2"><div class="cal-l">`+head+gcBar()+`<div class="grid">${cells}</div>`+legend+`</div><div class="cal-r">`+panel+classManage()+`</div></div>`;
+  return ttl+nextClassHtml()+`<div class="cal2"><div class="cal-l">`+head+gcBar()+`<div class="grid">${cells}</div>`+legend+`</div><div class="cal-r">`+panel+eventManage()+classManage()+`</div></div>`;
 }
 
 function taskListHtml(){
@@ -1364,7 +1373,7 @@ function addAct(){
 }
 
 /* ---------- Google Drive backup ---------- */
-const isData=x=>x.kind==='entry'||x.kind==='task'||x.kind==='cfg'||x.kind==='class'||x.kind==='note'||x.kind==='lock'||x.kind==='tag';
+const isData=x=>x.kind==='entry'||x.kind==='task'||x.kind==='cfg'||x.kind==='class'||x.kind==='note'||x.kind==='lock'||x.kind==='tag'||x.kind==='event';
 const driveDoc=()=>S.items.get('drive')||{kind:'drive',id:'drive',auto:false,lastAt:0,lastSig:'',folderId:'',photoFiles:{},counts:null};
 const gcall=(tool,input)=>S.mcp.callTool(DRV,tool,input,{cache:false});
 const gfiles=r=>{const p=r&&r.payload;return p&&Array.isArray(p.files)?p.files:[]};
@@ -2129,7 +2138,7 @@ function calMove(d){
 }
 (function(){
   let x0=0,y0=0,t0=0,on=false;
-  const ok=()=>S.tab==='calendar'&&!S.draft&&!S.cd&&!S.nd&&!S.ex&&$('#tgRoot').hidden&&$('#thRoot').hidden&&$('#bkRoot').hidden&&$('#lightbox').hidden;
+  const ok=()=>S.tab==='calendar'&&!S.draft&&!S.cd&&!S.ev&&!S.nd&&!S.ex&&$('#tgRoot').hidden&&$('#thRoot').hidden&&$('#bkRoot').hidden&&$('#lightbox').hidden;
   document.addEventListener('touchstart',ev=>{on=false;if(!ok()||ev.touches.length!==1)return;const t=ev.target;if(t.closest&&t.closest('input,textarea,select,.tabbar,.sheet-root'))return;x0=ev.touches[0].clientX;y0=ev.touches[0].clientY;t0=Date.now();on=true},{passive:true});
   document.addEventListener('touchend',ev=>{if(!on)return;on=false;if(!ok())return;const t=ev.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.6&&Date.now()-t0<900)calMove(dx<0?1:-1)},{passive:true});
   document.addEventListener('keydown',ev=>{if(ev.key!=='ArrowLeft'&&ev.key!=='ArrowRight')return;if(ev.altKey||ev.ctrlKey||ev.metaKey||!ok())return;const t=ev.target;if(t&&t.closest&&t.closest('input,textarea,select'))return;ev.preventDefault();calMove(ev.key==='ArrowRight'?1:-1)});
@@ -2138,6 +2147,7 @@ function calMove(d){
 /* ---------- class schedule ---------- */
 const classes=()=>[...S.items.values()].filter(x=>x.kind==='class'&&!x.deletedAt);
 const CL_ORDER=[1,2,3,4,5,6,0],DOWN3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const EVICON='<svg class="cli" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16v11H4zM8 4v4M16 4v4M4 12h16"/></svg>';
 function clTime(c,ds){
   if(c.repeat==='once')return c.date===ds?c.time:null;
   if(c.start&&ds<c.start)return null;if(c.until&&ds>c.until)return null;
@@ -2147,9 +2157,23 @@ const clStatus=(c,ds)=>((c.att||{})[ds])||((c.skips||[]).includes(ds)?'x':'');
 const clEx=(c,ds)=>(c.ex||{})[ds]||null;
 function clCounts(c){let a=0,x=0;const seen=new Set();for(const k of Object.keys(c.att||{})){seen.add(k);if(clEx(c,k)&&clEx(c,k).off)continue;if(c.att[k]==='a')a++;else if(c.att[k]==='x')x++}for(const k of c.skips||[])if(!seen.has(k))x++;return{a,x}}
 function classesOn(ds){
-  return classes().map(c=>{const base=clTime(c,ds),e=clEx(c,ds),off=!!(e&&e.off),st=off?'':clStatus(c,ds);
-    return {c,base,time:(e&&e.time&&!off)?e.time:base,place:(e&&e.place!==undefined&&e.place!==''&&!off)?e.place:(c.place||''),ex:e,off,changed:!!(e&&!off&&((e.time&&e.time!==base)||(e.place&&e.place!==(c.place||'')))),st,skipped:st==='x'}})
-    .filter(x=>x.base).sort((a,b)=>a.time.localeCompare(b.time));
+  const out=[];
+  classes().forEach(c=>{
+    const base=clTime(c,ds),e=clEx(c,ds);
+    if(base){
+      const off=!!(e&&e.off),st=off?'':clStatus(c,ds);
+      out.push({c,ds,base,time:(e&&e.time&&!off)?e.time:base,place:(e&&e.place!==undefined&&e.place!==''&&!off)?e.place:(c.place||''),ex:e,off,movedTo:(e&&e.moveTo)||'',moved:null,
+        changed:!!(e&&!off&&((e.time&&e.time!==base)||(e.place&&e.place!==(c.place||'')))),st,skipped:st==='x'});
+    }
+    Object.keys(c.ex||{}).forEach(k=>{
+      const v=c.ex[k];
+      if(v&&v.moveTo===ds){
+        const ob=clTime(c,k)||v.time||'00:00',st=clStatus(c,ds);
+        out.push({c,ds,base:ob,time:v.time||ob,place:v.place||c.place||'',ex:v,off:false,movedTo:'',moved:{from:k},changed:false,st,skipped:st==='x'});
+      }
+    });
+  });
+  return out.sort((a,b)=>a.time.localeCompare(b.time));
 }
 function addMin(t,m){if(!t||!m)return '';const [h,mi]=t.split(':').map(Number),x=h*60+mi+(+m),y=Math.floor(x/60)%24;return pad(y)+':'+pad(x%60)}
 function nextClass(){
@@ -2171,13 +2195,14 @@ function nextClassHtml(){
 }
 function classPanel(ds){
   const cl=classesOn(ds);if(!cl.length)return '';
-  const es=byDate().get(ds)||[];
+  const es=byDate().get(ds)||[],sd=d=>L(d,{weekday:'short',day:'numeric',month:'short'});
   return '<h3 class="day-h dh-c">'+CLOCKIC+'Classes</h3>'+cl.map(x=>{
     const c=x.c,end=addMin(x.time,c.min),logged=es.some(e=>T(e)===c.type),da=`data-id="${esc(c.id)}" data-date="${ds}" data-time="${esc(x.time)}" data-place="${esc(x.place)}"`;
+    const exDate=x.moved?x.moved.from:ds,dx=`data-id="${esc(c.id)}" data-date="${exDate}" data-time="${esc(x.base)}" data-place="${esc(x.place)}"`;
     const st=x.st,note=x.ex&&x.ex.note?' · '+esc(x.ex.note):'';
-    const flag=x.off?`<em class="clflag bad">Cancelled${note}</em>`:x.changed?`<em class="clflag">Changed${x.time!==x.base?' (was '+esc(x.base)+')':''}${note}</em>`:(x.ex&&x.ex.note?`<em class="clflag">${esc(x.ex.note)}</em>`:'');
+    const flag=x.movedTo?`<em class="clflag bad">Moved to ${esc(sd(x.movedTo))}${note}</em>`:x.off?`<em class="clflag bad">Cancelled${note}</em>`:x.moved?`<em class="clflag">Moved from ${esc(sd(x.moved.from))}${note}</em>`:x.changed?`<em class="clflag">Changed${x.time!==x.base?' (was '+esc(x.base)+')':''}${note}</em>`:(x.ex&&x.ex.note?`<em class="clflag">${esc(x.ex.note)}</em>`:'');
     const sub=[TYPES[c.type].n,x.place].filter(Boolean).map(esc).join(' · ');
-    return `<div class="clrow${x.skipped?' skipped':''}${x.off?' cancel':''}"><div class="cltime">${esc(x.time)}<small>${end&&!x.off?'to '+end:''}</small></div><div class="clmid"><b>${esc(c.title||TYPES[c.type].n)}</b><span>${sub}</span>${flag}</div><div class="clbtns"><button class="linkbtn" data-action="cl-ex" ${da}>Change / cancel</button><button class="linkbtn" data-action="cl-edit" data-id="${esc(c.id)}">Edit all</button></div>`
+    return `<div class="clrow${x.skipped?' skipped':''}${x.off?' cancel':''}"><div class="cltime">${esc(x.time)}<small>${end&&!x.off?'to '+end:''}</small></div><div class="clmid"><b>${esc(c.title||TYPES[c.type].n)}</b><span>${sub}</span>${flag}</div><div class="clbtns"><button class="linkbtn" data-action="cl-ex" ${dx}>Change / move / cancel</button><button class="linkbtn" data-action="cl-edit" data-id="${esc(c.id)}">Edit all</button></div>`
       +(x.off?'':`<div class="clatt" role="group" aria-label="Attendance"><button type="button" class="chip a${st==='a'?' on':''}" aria-pressed="${st==='a'}" data-action="cl-att" data-v="a" ${da}>Attended</button><button type="button" class="chip x${st==='x'?' on':''}" aria-pressed="${st==='x'}" data-action="cl-att" data-v="x" ${da}>Absent</button>`
       +(logged?'<span class="cldone">Logged ✓</span>':(st==='x'?'':`<button class="btn small" data-action="cl-log" ${da}>Log it</button>`))+'</div>')+'</div>';
   }).join('');
@@ -2207,7 +2232,9 @@ function clHtml(){
   else{
     const days=CL_ORDER.map(d=>`<button type="button" class="chip${c.days[d]?' on':''}" aria-pressed="${!!c.days[d]}" data-action="cl-day" data-d="${d}">${DOWN3[d]}</button>`).join('');
     const rows=CL_ORDER.filter(d=>c.days[d]).map(d=>`<label class="field cldayrow"><span class="lbl">${DOWN3[d]} starts at</span><input type="time" data-cl-day="${d}" value="${esc(c.days[d])}"></label>`).join('');
-    when=`<div><span class="lbl">Days</span><div class="chips">${days}</div></div>${rows}<div class="when"><label class="field"><span class="lbl">Starting</span><input type="date" id="clStart" value="${esc(c.start)}"></label><label class="field"><span class="lbl">Until (optional)</span><input type="date" id="clUntil" value="${esc(c.until||'')}"></label></div>`;
+    const opt=sel=>CL_ORDER.map(d=>`<option value="${d}"${+sel===d?' selected':''}>${DOWN3[d]}</option>`).join('');
+    const quick=`<div class="rangebox"><span class="lbl">Quick pick</span><div class="chips"><button type="button" class="chip" data-action="cl-preset" data-v="1,2,3,4,5">Mon–Fri</button><button type="button" class="chip" data-action="cl-preset" data-v="6,0">Sat–Sun</button><button type="button" class="chip" data-action="cl-preset" data-v="1,2,3,4,5,6,0">Every day</button><button type="button" class="chip" data-action="cl-preset" data-v="">Clear</button></div><div class="rangerow"><label class="field"><span class="lbl">From day</span><select id="clFrom">${opt(c.rf!==undefined?c.rf:3)}</select></label><label class="field"><span class="lbl">To day</span><select id="clTo">${opt(c.rt!==undefined?c.rt:5)}</select></label><button type="button" class="btn ghost small" data-action="cl-range">Add range</button></div><div class="rangerow"><label class="field"><span class="lbl">Same time for all picked days</span><input type="time" id="clAllTime" value="${esc(c.deft||'19:00')}"></label><button type="button" class="btn ghost small" data-action="cl-sametime">Apply</button></div></div>`;
+    when=`<div><span class="lbl">Days</span><div class="chips">${days}</div></div>${quick}${rows}<div class="when"><label class="field"><span class="lbl">Starting</span><input type="date" id="clStart" value="${esc(c.start)}"></label><label class="field"><span class="lbl">Until (optional)</span><input type="date" id="clUntil" value="${esc(c.until||'')}"></label></div>`;
   }
   const mins=[60,90,120].map(v=>`<button type="button" class="chip${+c.min===v?' on':''}" aria-pressed="${+c.min===v}" data-action="cl-min" data-v="${v}">${v}</button>`).join('');
   return `<div class="scrim" data-action="cl-close"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="clTitleH" tabindex="-1"><div class="sheet-head"><h2 id="clTitleH">${c.id?'Edit class':'New class'}</h2><button class="iconbtn" data-action="cl-close" aria-label="Close">${XICON}</button></div>
@@ -2250,6 +2277,9 @@ function clInput(t){
     case 'clUntil':c.until=t.value;break;
     case 'clMin':c.min=Math.max(0,+t.value||0);break;
     case 'clNote':c.note=t.value;break;
+    case 'clFrom':c.rf=+t.value;break;
+    case 'clTo':c.rt=+t.value;break;
+    case 'clAllTime':if(/^\d{2}:\d{2}$/.test(t.value||''))c.deft=t.value;break;
   }
   if(t.dataset&&t.dataset.clDay!==undefined){c.days[t.dataset.clDay]=t.value||c.deft;c.deft=t.value||c.deft}
 }
@@ -2284,18 +2314,94 @@ function clAtt(id,ds,v){
   put(Object.assign({},c,{att,skips:(c.skips||[]).filter(k=>k!==ds)}));
 }
 
+
+/* ---------- events (one date or a range, e.g. Wed-Fri) ---------- */
+const events=()=>[...S.items.values()].filter(x=>x.kind==='event'&&!x.deletedAt);
+const evEnd=e=>(e.end&&e.end>=e.start)?e.end:e.start;
+const evOn=ds=>events().filter(e=>e.start<=ds&&ds<=evEnd(e)).sort((a,b)=>(a.time||'').localeCompare(b.time||'')||(a.title||'').localeCompare(b.title||''));
+const dayDiff=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
+function evRange(e){
+  const f=d=>L(d,{weekday:'short',day:'numeric',month:'short'});
+  return evEnd(e)===e.start?f(e.start):f(e.start)+' – '+f(evEnd(e));
+}
+function eventPanel(ds){
+  const l=evOn(ds);if(!l.length)return '';
+  return '<h3 class="day-h dh-e">'+EVICON+'Events</h3>'+l.map(e=>{
+    const n=dayDiff(e.start,evEnd(e))+1,i=dayDiff(e.start,ds)+1;
+    return `<button class="card evitem" data-action="ev-edit" data-id="${esc(e.id)}"><b>${esc(e.title||'Event')}</b><span>${esc(evRange(e))}${n>1?' · Day '+i+' of '+n:''}${e.time?' · '+esc(e.time):''}${e.place?' · '+esc(e.place):''}</span>${e.note?`<span class="evnote">${esc(e.note)}</span>`:''}</button>`;
+  }).join('');
+}
+function eventManage(){
+  const t=todayStr(),up=events().filter(e=>evEnd(e)>=t).sort((a,b)=>a.start.localeCompare(b.start)).slice(0,6);
+  return '<section class="clmanage"><h3 class="day-h dh-e">'+EVICON+'Upcoming events</h3>'
+    +(up.length?up.map(e=>`<button class="card evitem" data-action="ev-edit" data-id="${esc(e.id)}"><b>${esc(e.title||'Event')}</b><span>${esc(evRange(e))}${e.time?' · '+esc(e.time):''}${e.place?' · '+esc(e.place):''}</span></button>`).join(''):'<p class="muted">Add tournaments, seminars, trips or anything that lasts a day or more. Pick one date or a range like Wed–Fri.</p>')
+    +`<button class="btn ghost wide" data-action="ev-new" data-date="${S.sel}">+ Add event</button></section>`;
+}
+function evBlank(date){const t=date||todayStr();return {id:null,ts:0,title:'',start:t,end:'',time:'',place:'',note:'',rf:3,rt:5}}
+function evHtml(){
+  const e=S.ev,err=S.evErr,opt=sel=>CL_ORDER.map(d=>`<option value="${d}"${+sel===d?' selected':''}>${DOWN3[d]}</option>`).join('');
+  const days=e.end&&e.end>e.start?dayDiff(e.start,e.end)+1:1;
+  return `<div class="scrim" data-action="ev-close"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="evTitleH" tabindex="-1"><div class="sheet-head"><h2 id="evTitleH">${e.id?'Edit event':'New event'}</h2><button class="iconbtn" data-action="ev-close" aria-label="Close">${XICON}</button></div>
+  <div class="sheet-body">
+   <label class="field"><span class="lbl">Name</span><input type="text" id="evName" maxlength="60" value="${esc(e.title)}" placeholder="e.g. Regional tournament" autocomplete="off"></label>
+   <div class="when"><label class="field"><span class="lbl">Starts</span><input type="date" id="evStart" value="${esc(e.start)}"></label><label class="field"><span class="lbl">Ends (optional)</span><input type="date" id="evEnd" value="${esc(e.end||'')}"></label></div>
+   <p class="bk-small" style="margin:0">${days>1?days+' days. It shows on every day of the range.':'One day. Add an end date to make it a range.'}</p>
+   <div class="rangebox"><span class="lbl">Quick range</span><div class="chips"><button type="button" class="chip" data-action="ev-preset" data-f="6" data-t="0">Weekend (Sat–Sun)</button><button type="button" class="chip" data-action="ev-preset" data-f="1" data-t="5">Mon–Fri</button><button type="button" class="chip" data-action="ev-preset" data-f="" data-t="">One day</button></div>
+   <div class="rangerow"><label class="field"><span class="lbl">From day</span><select id="evFrom">${opt(e.rf)}</select></label><label class="field"><span class="lbl">To day</span><select id="evTo">${opt(e.rt)}</select></label><button type="button" class="btn ghost small" data-action="ev-range">Set dates</button></div><p class="bk-small" style="margin:0">Picks the next ones on or after the start date.</p></div>
+   <div class="when"><label class="field"><span class="lbl">Time (optional)</span><input type="time" id="evTime" value="${esc(e.time||'')}"></label><label class="field"><span class="lbl">Place (optional)</span><input type="text" id="evPlace" maxlength="60" value="${esc(e.place||'')}" autocomplete="off"></label></div>
+   <label class="field"><span class="lbl">Note</span><textarea id="evNote" rows="2" placeholder="Optional: what to bring, who is going…">${esc(e.note||'')}</textarea></label>
+   ${err?`<p class="err" role="alert">${esc(err)}</p>`:''}
+  </div>
+  <div class="sheet-foot">${e.id?'<button class="btn danger" data-action="ev-del">Delete</button>':''}<button class="btn main" data-action="ev-save">Save event</button></div></div>`;
+}
+function renderEv(){const r=$('#evRoot');if(!r||!S.ev)return;const y=(r.querySelector('.sheet-body')||{}).scrollTop||0;r.innerHTML=evHtml();r.querySelectorAll('.sheet,.scrim').forEach(e=>{e.style.animation='none'});const b=r.querySelector('.sheet-body');if(b)b.scrollTop=y}
+function openEvent(id,date){
+  const src=id?S.items.get(id):null;
+  S.ev=src?Object.assign(evBlank(),src):evBlank(date);S.evErr='';S.lastFocus=document.activeElement;
+  const r=$('#evRoot');r.innerHTML=evHtml();r.hidden=false;
+  document.querySelector('.app').inert=true;document.querySelector('.tabbar').inert=true;document.documentElement.style.overflow='hidden';
+  r.querySelector('.sheet').focus();
+}
+function closeEvent(){
+  const r=$('#evRoot');r.hidden=true;r.innerHTML='';S.ev=null;
+  document.querySelector('.app').inert=false;document.querySelector('.tabbar').inert=false;document.documentElement.style.overflow='';
+  if(S.lastFocus&&S.lastFocus.focus&&document.contains(S.lastFocus))S.lastFocus.focus();
+}
+function evInput(t){
+  const e=S.ev;if(!e)return;
+  switch(t.id){
+    case 'evName':e.title=t.value;break;case 'evStart':e.start=t.value;break;case 'evEnd':e.end=t.value;renderEv();return;
+    case 'evTime':e.time=t.value;break;case 'evPlace':e.place=t.value;break;case 'evNote':e.note=t.value;break;
+    case 'evFrom':e.rf=+t.value;break;case 'evTo':e.rt=+t.value;break;
+  }
+}
+function evSetRange(f,t){
+  const e=S.ev,base=e.start||todayStr();
+  const nxt=(from,wd)=>{let d=from;for(let i=0;i<7;i++){if(parse(d).getDay()===wd)return d;d=addDays(d,1)}return from};
+  const a=nxt(base,f),z=nxt(a,t);e.start=a;e.end=z===a?'':z;S.evErr='';renderEv();
+}
+function saveEvent(){
+  const e=S.ev;
+  if(!(e.title||'').trim()){S.evErr='Give the event a name.';renderEv();return}
+  if(!/^\d{4}-\d\d-\d\d$/.test(e.start||'')){S.evErr='Pick a start date.';renderEv();return}
+  if(e.end&&e.end<e.start){S.evErr='The end date is before the start date.';renderEv();return}
+  if(e.time&&!/^\d{2}:\d{2}$/.test(e.time)){S.evErr='That time is not valid.';renderEv();return}
+  put({kind:'event',id:e.id||newId('v'),title:e.title.trim(),start:e.start,end:(e.end&&e.end>e.start)?e.end:'',time:e.time||'',place:(e.place||'').trim(),note:(e.note||'').trim(),ts:e.ts||Date.now()});
+  closeEvent();toast('Event saved');
+}
+
 /* ---------- change / cancel one class day ---------- */
 function exHtml(){
   const e=S.ex,c=S.items.get(e.id);if(!c)return '';
-  const md=[['normal','As scheduled'],['changed','Changed'],['off','Cancelled']].map(m=>`<button type="button" class="chip${e.mode===m[0]?' on':''}" aria-pressed="${e.mode===m[0]}" data-action="ex-mode" data-v="${m[0]}">${m[1]}</button>`).join('');
-  const fields=e.mode==='changed'?`<div class="when"><label class="field"><span class="lbl">New time</span><input type="time" id="exTime" value="${esc(e.time)}"></label><label class="field"><span class="lbl">New place</span><input type="text" id="exPlace" value="${esc(e.place)}" maxlength="60" placeholder="${esc(c.place||'Same place')}"></label></div>`:'';
+  const md=[['normal','As scheduled'],['changed','Changed time / place'],['moved','Move to another date'],['off','Cancelled']].map(m=>`<button type="button" class="chip${e.mode===m[0]?' on':''}" aria-pressed="${e.mode===m[0]}" data-action="ex-mode" data-v="${m[0]}">${m[1]}</button>`).join('');
+  const fields=e.mode==='moved'?`<div class="when"><label class="field"><span class="lbl">New date</span><input type="date" id="exDate" value="${esc(e.moveTo||'')}"></label><label class="field"><span class="lbl">Time</span><input type="time" id="exTime" value="${esc(e.time)}"></label></div><label class="field"><span class="lbl">Place (optional)</span><input type="text" id="exPlace" value="${esc(e.place)}" maxlength="60" placeholder="${esc(c.place||'Same place')}"></label>`:e.mode==='changed'?`<div class="when"><label class="field"><span class="lbl">New time</span><input type="time" id="exTime" value="${esc(e.time)}"></label><label class="field"><span class="lbl">New place</span><input type="text" id="exPlace" value="${esc(e.place)}" maxlength="60" placeholder="${esc(c.place||'Same place')}"></label></div>`:'';
   const note=e.mode==='normal'?'':`<label class="field"><span class="lbl">Reason (optional)</span><input type="text" id="exNote" value="${esc(e.note)}" maxlength="80" placeholder="${e.mode==='off'?'e.g. Sensei is sick':'e.g. Moved because of a tournament'}"></label>`;
-  return `<div class="scrim" data-action="ex-close"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="exT" tabindex="-1"><div class="sheet-head"><h2 id="exT">${esc(c.title||TYPES[c.type].n)} · ${esc(L(e.ds,{weekday:'short',day:'numeric',month:'short'}))}</h2><button class="iconbtn" data-action="ex-close" aria-label="Close">${XICON}</button></div><div class="sheet-body"><p class="bk-small" style="margin-top:0">This only changes this one day. Your regular schedule stays the same.</p><div class="chips">${md}</div>${fields}${note}${e.err?`<p class="err" role="alert">${esc(e.err)}</p>`:''}<div class="nact"><button type="button" class="btn" data-action="ex-save">Save</button><button type="button" class="btn ghost" data-action="ex-close">Cancel</button></div></div></div>`;
+  return `<div class="scrim" data-action="ex-close"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="exT" tabindex="-1"><div class="sheet-head"><h2 id="exT">${esc(c.title||TYPES[c.type].n)} · ${esc(L(e.ds,{weekday:'short',day:'numeric',month:'short'}))}</h2><button class="iconbtn" data-action="ex-close" aria-label="Close">${XICON}</button></div><div class="sheet-body"><p class="bk-small" style="margin-top:0">This only changes this one day. Your regular schedule stays the same. To change the weekdays for good, use Edit all.</p><div class="chips">${md}</div>${fields}${note}${e.err?`<p class="err" role="alert">${esc(e.err)}</p>`:''}<div class="nact"><button type="button" class="btn" data-action="ex-save">Save</button><button type="button" class="btn ghost" data-action="ex-close">Cancel</button></div></div></div>`;
 }
 function exPaint(){const r=$('#exRoot');r.innerHTML=exHtml();r.querySelectorAll('.sheet,.scrim').forEach(x=>{x.style.animation='none'})}
 function openEx(id,ds,time,place){
   const c=S.items.get(id);if(!c)return;const x=clEx(c,ds);
-  S.ex={id,ds,mode:x?(x.off?'off':'changed'):'normal',time:(x&&x.time)||time||'',place:(x&&x.place)||'',note:(x&&x.note)||'',err:''};
+  S.ex={id,ds,mode:x?(x.moveTo?'moved':x.off?'off':'changed'):'normal',moveTo:(x&&x.moveTo)||'',time:(x&&x.time)||time||'',place:(x&&x.place)||'',note:(x&&x.note)||'',err:''};
   S.lastFocus=document.activeElement;
   const r=$('#exRoot');r.innerHTML=exHtml();r.hidden=false;
   document.querySelector('.app').inert=true;document.querySelector('.tabbar').inert=true;document.documentElement.style.overflow='hidden';
@@ -2311,12 +2417,18 @@ function saveEx(){
   const ex=Object.assign({},c.ex||{});
   if(e.mode==='normal')delete ex[e.ds];
   else if(e.mode==='off')ex[e.ds]={off:1,note:e.note.trim()};
+  else if(e.mode==='moved'){
+    if(!/^\d{4}-\d\d-\d\d$/.test(e.moveTo||'')){e.err='Pick the new date.';exPaint();return}
+    if(e.moveTo===e.ds){e.err='That is the same day. Use Changed time / place instead.';exPaint();return}
+    if(!/^\d{2}:\d{2}$/.test(e.time||'')){e.err='Pick a time.';exPaint();return}
+    ex[e.ds]={off:1,moveTo:e.moveTo,time:e.time,place:e.place.trim()&&e.place.trim()!==(c.place||'')?e.place.trim():'',note:e.note.trim()};
+  }
   else{
     const base=clTime(c,e.ds),t=/^\d{2}:\d{2}$/.test(e.time)&&e.time!==base?e.time:'',pl=e.place.trim()&&e.place.trim()!==(c.place||'')?e.place.trim():'';
     if(!t&&!pl){e.err='Set a new time or a new place.';exPaint();return}
     ex[e.ds]={time:t,place:pl,note:e.note.trim()};
   }
-  put(Object.assign({},c,{ex}));closeEx();toast(e.mode==='off'?'Class cancelled for that day':e.mode==='changed'?'Class changed for that day':'Back to normal');
+  put(Object.assign({},c,{ex}));closeEx();toast(e.mode==='off'?'Class cancelled for that day':e.mode==='moved'?'Class moved to '+L(e.moveTo,{weekday:'short',day:'numeric',month:'short'}):e.mode==='changed'?'Class changed for that day':'Back to normal');
 }
 
 /* ---------- sample data (clearly marked, removable) ---------- */
@@ -2344,7 +2456,7 @@ async function removeSamples(){
 /* ---------- Sawasdee-style pages: More, Settings, Backup Center, Trash, Search, Welcome ---------- */
 const LS_GET=(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}};
 const LS_SET=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-const TRASH_KINDS=['entry','task','note','class'],TRASH_DAYS=30;
+const TRASH_KINDS=['entry','task','note','class','event'],TRASH_DAYS=30;
 function softDel(id){const it=S.items.get(id);if(!it||it.deletedAt)return Promise.resolve(false);return put(Object.assign({},it,{deletedAt:Date.now()}))}
 const trashed=()=>[...S.items.values()].filter(x=>x.deletedAt&&TRASH_KINDS.includes(x.kind)).sort((a,b)=>b.deletedAt-a.deletedAt);
 async function hardDel(x){
@@ -2358,6 +2470,7 @@ function trashTitle(x){
   if(x.kind==='task')return x.title;
   if(x.kind==='note')return x.locked?'Locked note (title hidden)':ntTitle(x);
   if(x.kind==='class')return x.title+(x.place?' · '+x.place:'');
+  if(x.kind==='event')return (x.title||'Event')+' · '+evRange(x);
   return x.id;
 }
 function vTrash(){
@@ -2365,7 +2478,7 @@ function vTrash(){
   const l=trashed();
   let h='<div class="pg-title"><h2>Trash</h2><p>Deleted items wait here for 30 days. Restore them any time before then.</p></div><p class="bk-small" style="margin-bottom:12px">After 30 days, items in the Trash are removed permanently. This is the only automatic deletion in the app.</p>';
   if(!l.length)return h+`<div class="empty">${face(3)}<h2>The Trash is empty</h2><p>When you delete a log, task, note or class it moves here first, so a slip never costs you your data.</p></div>`;
-  const KL={entry:'Log',task:'Task',note:'Note',class:'Class'};
+  const KL={entry:'Log',task:'Task',note:'Note',class:'Class',event:'Event'};
   h+=l.map(x=>{
     const left=Math.max(0,Math.ceil((x.deletedAt+TRASH_DAYS*864e5-Date.now())/864e5)),sure=S.trc===x.id;
     return `<div class="trashrow"><div class="tt"><span class="tag k">${KL[x.kind]}</span><b>${esc(trashTitle(x))}</b></div><small>Deleted ${esc(new Date(x.deletedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'}))} · ${left} day${left===1?'':'s'} left</small><div class="row">`
@@ -2384,6 +2497,7 @@ function vMore(){
     +row('tab','data-tab="search"',I('<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/>'),'Search','Find logs, notes, tasks and classes')
     +row('tg-manage','',I('<path d="M4 12V5h7l9 9-7 7-9-9z"/><circle cx="8" cy="9" r="1.3"/>'),'Tags','Colours to sort logs and notes')
     +row('cl-new','',I('<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>'),'Add a class','Weekly dojo schedule and attendance')
+    +row('ev-new','',I('<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M8 14h8"/>'),'Add an event','Tournaments, seminars, trips — one day or a range')
     +row('tab','data-tab="settings"',I('<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/>'),'Settings','Journal name, colours, faces, decorations')
     +row('tab','data-tab="backup"',I('<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/>'),'Backup Center','Protect your journal and move it between devices',due?'Due':'')
     +row('tab','data-tab="trash"',I('<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>'),'Trash','Deleted items wait here for 30 days',tn?String(tn):'')
@@ -2419,8 +2533,9 @@ function srHtml(){
   const tk=tasks().filter(x=>has(x.title)).slice(0,20);
   const nt=notes().filter(n=>has(n.title,n.body,tn(n.tags))).slice(0,20);
   const cl=classes().filter(c=>has(c.title,c.place,c.note)).slice(0,20);
+  const ev=events().filter(c=>has(c.title,c.place,c.note)).slice(0,20);
   const sec=(t,l,f)=>l.length?`<section><h2 class="day-h">${t} · ${l.length}</h2>${l.map(f).join('')}</section>`:'';
-  const out=sec('Logs',en,entryCard)+sec('Notes',nt,n=>ncardHtml(n,false))+sec('Tasks',tk,taskRow)+sec('Classes',cl,c=>`<button class="card clitem" data-action="cl-edit" data-id="${esc(c.id)}"><b>${esc(c.title)}</b><span>${esc(c.place||'')}</span></button>`);
+  const out=sec('Logs',en,entryCard)+sec('Notes',nt,n=>ncardHtml(n,false))+sec('Tasks',tk,taskRow)+sec('Classes',cl,c=>`<button class="card clitem" data-action="cl-edit" data-id="${esc(c.id)}"><b>${esc(c.title)}</b><span>${esc(c.place||'')}</span></button>`)+sec('Events',ev,c=>`<button class="card evitem" data-action="ev-edit" data-id="${esc(c.id)}"><b>${esc(c.title)}</b><span>${esc(evRange(c))}${c.place?' · '+esc(c.place):''}</span></button>`);
   return (out||'<p class="muted">Nothing found for “'+esc(S.sq.trim())+'”.</p>')+(lockedNotes().length?'<p class="bk-small" style="margin-top:12px">Locked notes are not searched.</p>':'');
 }
 function vSearch(){
@@ -2558,11 +2673,21 @@ document.addEventListener('click',ev=>{
     case 'pk-close':S.pk.open=false;renderPk();break;
     case 'pk-pick':pkPick(b.dataset.id);break;
     case 'cl-new':openClass(null,b.dataset.date);break;
+    case 'ev-new':openEvent(null,b.dataset.date);break;
+    case 'ev-edit':openEvent(b.dataset.id);break;
+    case 'ev-close':closeEvent();break;
+    case 'ev-save':saveEvent();break;
+    case 'ev-del':{const id=S.ev.id;closeEvent();softDel(id);toast('Event moved to Trash');break}
+    case 'ev-preset':if(b.dataset.f===''){S.ev.end='';renderEv()}else evSetRange(+b.dataset.f,+b.dataset.t);break;
+    case 'ev-range':evSetRange(+$('#evFrom').value,+$('#evTo').value);break;
     case 'cl-edit':openClass(b.dataset.id);break;
     case 'cl-close':closeClass();break;
     case 'cl-type':{const c=S.cd;const old=TYPES[c.type].min||60;c.type=b.dataset.v;if(!c.min||+c.min===old||+c.min===60)c.min=TYPES[c.type].min||60;renderCl();break}
     case 'cl-place':{const c=S.cd;c.place=c.place.trim()===b.dataset.name?'':b.dataset.name;renderCl();break}
     case 'cl-rep':S.cd.repeat=b.dataset.v;S.clErr='';renderCl();break;
+    case 'cl-preset':{const c=S.cd,t=($('#clAllTime')||{}).value||c.deft||'19:00';c.days={};(b.dataset.v?b.dataset.v.split(','):[]).forEach(d=>{c.days[d]=t});c.deft=t;S.clErr='';renderCl();break}
+    case 'cl-range':{const c=S.cd,a=+$('#clFrom').value,z=+$('#clTo').value,t=($('#clAllTime')||{}).value||c.deft||'19:00',ia=CL_ORDER.indexOf(a),iz=CL_ORDER.indexOf(z);c.rf=a;c.rt=z;let i=ia;for(let n=0;n<7;n++){const d=CL_ORDER[i];if(!c.days[d])c.days[d]=t;if(i===iz)break;i=(i+1)%7}c.deft=t;S.clErr='';renderCl();break}
+    case 'cl-sametime':{const c=S.cd,t=($('#clAllTime')||{}).value;if(/^\d{2}:\d{2}$/.test(t||'')){Object.keys(c.days).forEach(d=>{c.days[d]=t});c.deft=t}renderCl();break}
     case 'cl-day':{const c=S.cd,k=b.dataset.d;if(c.days[k])delete c.days[k];else c.days[k]=c.deft||'19:00';renderCl();break}
     case 'cl-min':S.cd.min=+b.dataset.v;renderCl();break;
     case 'cl-save':saveClass();break;
@@ -2638,8 +2763,9 @@ document.addEventListener('input',ev=>{
   if(t.id==='srQ'){S.sq=t.value;const rb=$('#srRes');if(rb)rb.innerHTML=srHtml();return}
   if(t.id==='ntSearch'){S.nq=t.value;const b=$('#ntListBox');if(b)b.innerHTML=ntList();return}
   if(S.nd){const n=S.nd;if(t.id==='ntDate'){if(t.value){n.date=t.value;n.dirty=true}}else if(t.id==='ntTitle'){n.title=t.value;n.dirty=true}else if(t.id==='ntBody'){n.body=t.value;n.dirty=true}else if(t.dataset&&t.dataset.ntvid!==undefined){const i=+t.dataset.ntvid;n.videos[i]=t.value;n.dirty=true;const pv=$('#ntvp'+i);if(pv)pv.innerHTML=vidPreview(t.value)}return}
-  if(S.ex&&t.closest&&t.closest('#exRoot')){if(t.id==='exTime')S.ex.time=t.value;else if(t.id==='exPlace')S.ex.place=t.value;else if(t.id==='exNote')S.ex.note=t.value;return}
+  if(S.ex&&t.closest&&t.closest('#exRoot')){if(t.id==='exTime')S.ex.time=t.value;else if(t.id==='exDate')S.ex.moveTo=t.value;else if(t.id==='exPlace')S.ex.place=t.value;else if(t.id==='exNote')S.ex.note=t.value;return}
   if(S.cd&&t.closest&&t.closest('#clRoot')){clInput(t);return}
+  if(S.ev&&t.closest&&t.closest('#evRoot')){evInput(t);return}
   const d=S.draft;if(!d)return;
   if(t.dataset&&t.dataset.rep!==undefined){d.k.repsBy=d.k.repsBy||{};d.k.repsBy[t.dataset.rep]=Math.max(0,Math.min(5000,+t.value||0));updateRepTot();return}
   if(t.dataset&&t.dataset.vid!==undefined){const i=+t.dataset.vid;d.videos[i]=t.value;const p=$('#vp'+i);if(p)p.innerHTML=vidPreview(t.value);return}
@@ -2657,7 +2783,7 @@ document.addEventListener('input',ev=>{
 });
 setInterval(()=>{if(S.draft)draftStash()},1500);document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.draft)draftStash()});window.addEventListener('pagehide',()=>{if(S.draft)draftStash()});
 document.addEventListener('error',ev=>{const t=ev.target;if(t&&t.classList&&t.classList.contains('vth'))t.remove()},true);
-document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){const m=$('#qaMenu');if(m&&!m.hidden){qaClose();const tb=document.querySelector('[data-action="qa-toggle"]');if(tb)tb.focus();return}}if(ev.key==='Enter'&&ev.target&&ev.target.id==='tgName'&&S.tg){ev.preventDefault();tgAdd(S.tg.ctx);return}if(ev.key==='Escape'){if(!$('#lightbox').hidden)closeLightbox();else if(!$('#tgRoot').hidden){closeTgm();render()}else if(!$('#lkRoot').hidden)closeLk();else if(!$('#exRoot').hidden)closeEx();else if(!$('#bkRoot').hidden)closeBackup();else if(!$('#thRoot').hidden)closeTheme();else if(!$('#clRoot').hidden)closeClass();else if(S.nd)closeNote(true);else if(S.draft)closeSheet()}});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){const m=$('#qaMenu');if(m&&!m.hidden){qaClose();const tb=document.querySelector('[data-action="qa-toggle"]');if(tb)tb.focus();return}}if(ev.key==='Enter'&&ev.target&&ev.target.id==='tgName'&&S.tg){ev.preventDefault();tgAdd(S.tg.ctx);return}if(ev.key==='Escape'){if(!$('#lightbox').hidden)closeLightbox();else if(!$('#tgRoot').hidden){closeTgm();render()}else if(!$('#lkRoot').hidden)closeLk();else if(!$('#exRoot').hidden)closeEx();else if(!$('#bkRoot').hidden)closeBackup();else if(!$('#thRoot').hidden)closeTheme();else if(!$('#clRoot').hidden)closeClass();else if(!$('#evRoot').hidden)closeEvent();else if(S.nd)closeNote(true);else if(S.draft)closeSheet()}});
 document.addEventListener('change',ev=>{const t=ev.target;if(t.id==='impFile'){importFile(t.files[0]);t.value='';return}if(t.id==='bkRemind'||t.id==='wlRemind'){LS_SET('kj-bk-remind',t.value);renderBars();return}if(t.id==='bkAuto'){setAuto(t.checked);return}if(t.id==='gcShow'){setGcal({show:t.checked});S.gerr='';S.gev={};render();renderBackup();return}if(t.id==='gcTasks'||t.id==='gcSess'){setGcal(t.id==='gcTasks'?{outTasks:t.checked}:{outSessions:t.checked});runCalSync(true);return}if(t.dataset&&t.dataset.tgname!==undefined){const g=tagOf(t.dataset.tgname),nm=t.value.trim();if(g&&nm&&nm!==g.name)put(Object.assign({},g,{name:nm}));else if(g&&!nm)t.value=g.name;return}if(t.id==='ntPhotos'){const fs=[...t.files];t.value='';if(fs.length)addNtPhotos(fs);return}if(t.id==='fpFile'){const f=t.files[0];t.value='';fpPick(f);return}if(t.id==='fPhotos'){const fs=[...t.files];t.value='';if(fs.length)addPhotos(fs)}});
 
 /* ---------- start ---------- */

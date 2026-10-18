@@ -454,6 +454,7 @@ html.no-deco #splash .sp-d{display:none}
 
 
 .when{grid-template-columns:repeat(2,minmax(0,1fr))}.when .field{min-width:0}.when input[type=date],.when input[type=time],.when input[type=text]{min-width:0;width:100%;box-sizing:border-box}
+.cnum.face{position:relative;background:var(--mc);box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}.cnum.face .face{width:30px;height:30px;border-radius:50%;display:block}.cnum.face b{position:absolute;top:-5px;left:-5px;min-width:16px;height:16px;line-height:16px;text-align:center;font-size:10px;font-weight:700;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:9px;padding:0 2px}
 .mk-e{width:7px;height:7px;border-radius:2px;background:#7A5CCF;display:inline-block;transform:rotate(45deg)}
 .dh-e{color:#6a4cc0}.evitem{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;margin-bottom:8px;padding:12px 14px;border-left:6px solid #7A5CCF!important;color:var(--ink)}.evitem span{font-size:13px;color:var(--ink-2)}.evitem .evnote{font-style:italic}
 .rangebox{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border:2px dashed var(--line);border-radius:16px}.rangerow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.rangerow .field{flex:1;min-width:110px}.rangerow select{width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);padding:0 10px;color:var(--ink);font:inherit}
@@ -957,11 +958,11 @@ function vCalendar(){
   for(let d=1;d<=dim;d++){
     const ds=y+'-'+pad(m+1)+'-'+pad(d),es=by.get(ds)||[],mood=avgMood(es);
     const hasK=es.some(e=>T(e)==='keiko'),hasJ=es.some(e=>T(e)==='jishuren'),hasT=due.has(ds),hasC=classesOn(ds).some(x=>!x.skipped&&!x.off),hasE=evOn(ds).length>0,hasG=!!(gb&&gb[ds]&&gb[ds].length);
-    cells+=`<button class="cell${ds===t?' today':''}${ds===S.sel?' sel':''}" data-action="pick-day" data-date="${ds}" aria-label="${d} ${esc(L(ds,{month:'long'}))}, ${mood?MN[mood]:'no entries'}${hasK?', keiko':''}${hasJ?', jishuren':''}${hasG?', Google event':''}${hasT?', task due':''}${hasC?', class':''}${hasE?', event':''}"><span class="cnum${mood?' has m'+mood:''}">${d}</span><span class="marks">${hasK?'<i class="mk-k"></i>':''}${hasJ?'<i class="mk-j"></i>':''}${hasG?'<i class="mk-g"></i>':''}${hasT?'<i class="mk-t"></i>':''}${hasC?'<i class="mk-c"></i>':''}${hasE?'<i class="mk-e"></i>':''}</span></button>`;
+    cells+=`<button class="cell${ds===t?' today':''}${ds===S.sel?' sel':''}" data-action="pick-day" data-date="${ds}" aria-label="${d} ${esc(L(ds,{month:'long'}))}, ${mood?MN[mood]:'no entries'}${hasK?', keiko':''}${hasJ?', jishuren':''}${hasG?', Google event':''}${hasT?', task due':''}${hasC?', class':''}${hasE?', event':''}">${(mood&&calFaces)?`<span class="cnum has face m${mood}">${face(mood)}<b>${d}</b></span>`:`<span class="cnum${mood?' has m'+mood:''}">${d}</span>`}<span class="marks">${hasK?'<i class="mk-k"></i>':''}${hasJ?'<i class="mk-j"></i>':''}${hasG?'<i class="mk-g"></i>':''}${hasT?'<i class="mk-t"></i>':''}${hasC?'<i class="mk-c"></i>':''}${hasE?'<i class="mk-e"></i>':''}</span></button>`;
   }
   const label=new Date(y,m,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
   const head=`<div class="calhead"><button class="iconbtn" data-action="cal-prev" aria-label="Previous month">${LEFT}</button><h2>${esc(label)}</h2><div class="cal-tools"><button class="btn ghost small" data-action="cal-today">Today</button><button class="iconbtn" data-action="cal-next" aria-label="Next month">${RIGHT}</button></div></div>`;
-  const legend='<div class="legend"><span>Colored day = mood</span><span><i class="mk-k"></i> Keiko</span><span><i class="mk-j"></i> Jishuren</span><span><i class="mk-t"></i> Task due</span><span><i class="mk-c"></i> Class</span><span><i class="mk-e"></i> Event</span>'+(gcalDoc().show?'<span><i class="mk-g"></i> Google event</span>':'')+'</div>';
+  const legend='<div class="legend"><span>Face or colour = mood</span><span><i class="mk-k"></i> Keiko</span><span><i class="mk-j"></i> Jishuren</span><span><i class="mk-t"></i> Task due</span><span><i class="mk-c"></i> Class</span><span><i class="mk-e"></i> Event</span>'+(gcalDoc().show?'<span><i class="mk-g"></i> Google event</span>':'')+'</div>';
   const es=by.get(S.sel)||[],ts=tasks().filter(x=>x.due===S.sel);
   const panel=`<section><h2 class="day-h">${esc(L(S.sel,{weekday:'long',day:'numeric',month:'long'}))}</h2>${eventPanel(S.sel)}${classPanel(S.sel)}${es.map(entryCard).join('')||'<p class="muted">No entries for this day.</p>'}${ts.length?`<h3 class="day-h">${CHECKSQ}Tasks due</h3>${ts.map(taskRow).join('')}`:''}${gcPanel()}<button class="btn ghost wide" data-action="new" data-date="${S.sel}">Add entry for this day</button></section>`;
   const ttl='<div class="pg-title"><h2>Today</h2><p>'+esc(new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</p></div>';
@@ -1809,6 +1810,7 @@ function thHtml(){
   const sw=(a,b)=>THEMES.slice(a,b).map(t=>`<button type="button" class="sw${t.id===thSel.id?' on':''}" style="background:${swBg(t)}" data-action="th-pick" data-id="${t.id}" aria-pressed="${t.id===thSel.id}" aria-label="${esc(t.n)}${t.c[1]?', two-tone':''}">${t.id===thSel.id?'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':''}</button>`).join('');
   return nmHtml()+'<h3 class="bk-h">Appearance</h3><div class="chips">'+md+'</div>'
     +'<h3 class="bk-h">Decorations</h3><div class="chips"><button type="button" class="chip'+(decoOn?' on':'')+'" aria-pressed="'+decoOn+'" data-action="deco-toggle">Sparkles, tape and dots: '+(decoOn?'on':'off')+'</button></div><p class="bk-small">Turn off for a plainer, calmer look.</p>'
+    +'<h3 class="bk-h">Calendar</h3><div class="chips"><button type="button" class="chip'+(calFaces?' on':'')+'" aria-pressed="'+calFaces+'" data-action="cal-faces">Mood faces on days: '+(calFaces?'on':'off')+'</button></div><p class="bk-small">Shows your mood face on each day that has a log. Off shows colours only.</p>'
     +'<h3 class="bk-h">Colour · '+esc(cur.n)+(cur.c[1]?' (two-tone)':'')+'</h3><div class="swgrid">'+sw(0,20)+'</div>'
     +'<h3 class="bk-h">Two-tone</h3><div class="swgrid">'+sw(20,32)+'</div>'
     +fpHtml()
@@ -1846,6 +1848,7 @@ function closeTheme(){
 }
 S.tab=routeFromHash();
 let decoOn=true;try{decoOn=localStorage.getItem('kj-deco')!=='0'}catch(e){}
+let calFaces=true;try{calFaces=localStorage.getItem('kj-calfaces')!=='0'}catch(e){}
 function decoApply(){document.documentElement.classList.toggle('no-deco',!decoOn)}
 decoApply();
 thLoad();thApply();
@@ -2714,6 +2717,7 @@ document.addEventListener('click',ev=>{
     case 'cl-att':clAtt(b.dataset.id,b.dataset.date,b.dataset.v);break;
     case 'open-theme':openTheme();break;
     case 'close-theme':closeTheme();break;
+    case 'cal-faces':calFaces=!calFaces;try{localStorage.setItem('kj-calfaces',calFaces?'1':'0')}catch(e){}render();renderTheme();break;
     case 'deco-toggle':decoOn=!decoOn;try{localStorage.setItem('kj-deco',decoOn?'1':'0')}catch(e){}decoApply();renderTheme();break;
     case 'th-mode':thSel.mode=b.dataset.v;thSave();thApply();renderTheme();break;
     case 'fp-pack':{const id=b.dataset.id;if(id!=='mine')fpSel.base=id;fpSel.pack=id;fpSave();render();renderTheme();break}

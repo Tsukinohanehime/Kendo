@@ -283,6 +283,7 @@ label.field{display:block}
 .tgrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}.tgp{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:99px;border:1.5px solid var(--tc);background:var(--surface);color:var(--ink);font-weight:600;font-size:13px}.tgp i,.tgc i{width:10px;height:10px;border-radius:50%;background:var(--tc);flex:none}.tgp.on{background:var(--tc);color:#fff}.tgp.on i{background:#fff}.tgp b{font-weight:700;opacity:.7;font-size:12px}.tgc{display:inline-flex;align-items:center;gap:5px;padding:2px 9px 2px 7px;border-radius:99px;font-size:12px;font-weight:600;background:var(--surface-2);color:var(--ink)}.tgc i{width:8px;height:8px}.tgd{border-left:4px solid var(--tc)}.tgbar{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;margin:6px 0;scrollbar-width:none}.tgbar::-webkit-scrollbar{display:none}.tgbar .tgp,.tgm{flex:none}.tgm{min-height:36px;padding:0 12px;border-radius:99px;background:transparent;color:var(--ink-2);font-weight:600;font-size:13px;border:1.5px dashed var(--line)}.tgform{margin:8px 0;display:grid;gap:10px}.tgdots{display:flex;flex-wrap:wrap;gap:10px}.tgdot{width:30px;height:30px;border-radius:50%;background:var(--tc);border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--line);padding:0;flex:none}.tgdot.on{box-shadow:0 0 0 3px var(--ink)}.tgmrow{display:grid;grid-template-columns:34px 1fr auto 40px;gap:8px;align-items:center;margin-bottom:8px}.tgn{font-size:12px;color:var(--ink-2);min-width:16px;text-align:center}.tgpal{margin:0 0 12px 42px}.tgconf{padding:10px 12px;border-radius:14px;background:var(--surface-2);margin-bottom:8px}
 .swgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0 14px}.sw{aspect-ratio:1;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--line);display:grid;place-items:center;padding:0}.sw.on{box-shadow:0 0 0 3px var(--ink)}.sw svg{width:22px;height:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
 .mk-c{width:6px;height:6px;border-radius:50%;background:var(--cls);display:inline-block}
+.rkbox{font:700 19px/1.5 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.05em;text-align:center;padding:14px 10px;margin:10px 0;border-radius:14px;background:var(--accent-soft);color:var(--ink);user-select:all;word-break:break-all}.lkl.chk{display:flex;align-items:center;gap:10px;margin:8px 0}.lkl.chk input{width:20px;height:20px}
 .todaytasks{margin:12px 0 0}.todaytasks .day-h{margin-top:0}.cal2more{margin-top:8px}
 .nextclass{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;margin:12px 0 0;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--cls) 14%,var(--surface));color:var(--ink);border-left:4px solid var(--cls)}.nextclass .nc-l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cls);display:flex;align-items:center;gap:6px}.nextclass .nc-l svg{width:14px;height:14px}.nextclass span:last-child{font-size:14px;color:var(--ink-2)}
 .clrow{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;border-left:4px solid var(--cls);background:var(--surface);box-shadow:var(--shadow);margin-bottom:8px}.clrow.skipped .cltime,.clrow.skipped .clmid{opacity:.55}.cltime{color:var(--cls);font-weight:700;font-size:17px;min-width:54px;display:flex;flex-direction:column}.cltime small{font-size:11px;font-weight:600;color:var(--ink-2)}.clmid{flex:1;min-width:0;display:flex;flex-direction:column}.clmid span,.clmid em{font-size:13px;color:var(--ink-2);font-style:normal}.clrow{flex-wrap:wrap}.clatt{flex-basis:100%;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.clatt .chip{min-height:36px;padding:0 12px;font-size:13px}.clatt .chip.a.on{background:var(--cls);color:var(--bg)}.clatt .chip.x.on{background:var(--danger);color:var(--bg)}.clatt .btn{margin-left:auto}.clitem span+span{display:block}.clflag{display:block;font-size:12px!important;font-weight:700;color:var(--accent)!important}.clflag.bad{color:var(--danger)!important}.clrow.cancel .cltime,.clrow.cancel .clmid b{text-decoration:line-through}.clrow.cancel .cltime,.clrow.cancel .clmid b,.clrow.cancel .clmid span{opacity:.55}.clbtns{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.cldone{font-size:13px;font-weight:700;color:var(--cls)}.day-h svg{width:14px;height:14px;vertical-align:-2px;margin-right:6px}.dh-c{color:var(--cls)}
@@ -716,7 +717,7 @@ function bkCheck(x){
     case 'class':if(!isStr(x.title))return 'no title';break;
     case 'event':if(!isStr(x.title))return 'no title';if(!DATE_RE.test(x.start||''))return 'bad start date';if(x.end&&!DATE_RE.test(x.end))return 'bad end date';break;
     case 'note':if(x.locked){if(!isObj(x.enc))return 'locked note without data'}else if(!isStr(x.title||'')||!isStr(x.body||''))return 'bad text';break;
-    case 'lock':if(!isStr(x.salt)||!isStr(x.chk))return 'bad lock';break;
+    case 'lock':if(!isStr(x.salt)||!(isObj(x.chk)||isStr(x.chk)))return 'bad lock';break;
     case 'tag':if(!isStr(x.name)||!x.name)return 'no name';break;
     case 'cfg':if(x.acts!==undefined&&!Array.isArray(x.acts))return 'bad activities';break;
   }
@@ -859,7 +860,7 @@ function planHtml(pl){
     +'<div class="chips" role="group" aria-label="Restore mode"><button type="button" class="chip'+(rep?'':' on')+'" aria-pressed="'+(!rep)+'" data-action="bkf-mode" data-v="add">Add what is missing</button><button type="button" class="chip'+(rep?' on':'')+'" aria-pressed="'+rep+'" data-action="bkf-mode" data-v="replace">Replace everything</button></div>'
     +'<ul class="bk-list">'
     +(rep?li('<b>All '+cur+'</b> items currently on this phone will be replaced by the <b>'+pl.valid.length+'</b> in the file.')+li('Anything on this phone that is not in the file will be removed.')+li('A safety copy of what is here now is saved first (the latest 3 are kept).')
-      :li('<b>'+pl.add.length+'</b> new item'+(pl.add.length===1?'':'s')+' will be added')+li(pl.same.length+' already on this phone (kept as they are)'+(pl.same.filter(x=>(S.items.get(x.id)||{}).deletedAt).length?', '+pl.same.filter(x=>(S.items.get(x.id)||{}).deletedAt).length+' of them are in the Trash':''))+(pl.cfgMerge.length?li('Custom activity lists will be merged'):'')+(pl.skipLock.length?li(pl.skipLock.length+' locked item'+(pl.skipLock.length===1?'':'s')+' skipped, they use a different lock code'):''))
+      :li('<b>'+pl.add.length+'</b> new item'+(pl.add.length===1?'':'s')+' will be added')+li(pl.same.length+' already on this phone (kept as they are)'+(pl.same.filter(x=>(S.items.get(x.id)||{}).deletedAt).length?', '+pl.same.filter(x=>(S.items.get(x.id)||{}).deletedAt).length+' of them are in the Trash':''))+(pl.cfgMerge.length?li('Custom activity lists will be merged'):'')+(pl.skipLock.length?li(pl.skipLock.length+' locked item'+(pl.skipLock.length===1?'':'s')+' skipped, they use a different lock code. To open them: Notes → Code settings → Recover from a backup file'):''))
     +(pl.missing?li(pl.missing+' photo'+(pl.missing===1?'':'s')+' mentioned in logs or notes but not in the file'):'')
     +(pl.rejected.length?li('<b>'+pl.rejected.length+'</b> rejected as invalid:<ul class="bk-list">'+rej+(pl.rejected.length>6?'<li>…and '+(pl.rejected.length-6)+' more</li>':'')+'</ul>'):'')
     +'</ul><div class="row"><button class="btn'+(rep?' danger':'')+'" data-action="bkf-apply">'+(rep?'Replace everything':'Add them')+'</button><button class="btn ghost" data-action="bkf-cancel">Cancel</button></div></div>';
@@ -889,7 +890,7 @@ function fileBkHtml(){
   +card('Storage health',`<div class="kv"><span>Protected from automatic clean-up</span><b>${esc(pers)}</b></div>`+(st.usage!=null?`<div class="kv"><span>Space used by this app</span><b>${esc(fmtB(st.usage))}${st.quota?' of about '+esc(fmtB(st.quota)):''}</b></div>`:'')+'<p class="bk-small">Browsers give estimates only. Protected storage only reduces automatic clean-up by the browser. It does not protect against clearing site data, a lost or broken phone, or a reset.</p><button class="btn ghost" data-action="bkf-persist">Ask the browser to protect my data</button>')
   +card('Export as CSV','<p>Spreadsheet files for reading or your own records. They cannot be restored, so use a full backup for that.</p><div class="btnrow"><button class="btn ghost" data-action="bkf-csv" data-k="logs">Logs</button><button class="btn ghost" data-action="bkf-csv" data-k="tasks">Tasks</button><button class="btn ghost" data-action="bkf-csv" data-k="notes">Notes</button><button class="btn ghost" data-action="bkf-csv" data-k="events">Events</button><button class="btn ghost" data-action="bkf-csv" data-k="att">Attendance</button></div><p class="bk-small">Locked notes are never exported.</p>')
   +card('Recent backup activity',log.length?'<ul class="bklog">'+log.map(x=>`<li><span>${esc(x.m)}</span><span>${esc(fm(x.t))}</span></li>`).join('')+'</ul><p class="bk-small">“Download started” means the browser was asked to save the file. We cannot see whether it was kept.</p>':'<p>No activity yet.</p>')
-  +card('If your data disappears','<ol><li>Open this app at the same web address you used before.</li><li>Go to More → Backup Center → “Choose backup file”.</li><li>Pick your most recent backup file and review the preview.</li><li>Choose “Add what is missing” for an empty or new phone, then confirm.</li><li>No backup file? Check your Downloads folder, cloud drive and email for files named “keiko-journal-backup-….json”. Without a copy outside the browser, erased data can’t be recovered.</li></ol><p class="note">To move to a new phone: download a backup here, open the app on the new phone, and restore it there.</p>');
+  +card('If your data disappears','<ol><li>Open this app at the same web address you used before.</li><li>Go to More → Backup Center → “Choose backup file”.</li><li>Pick your most recent backup file and review the preview.</li><li>Choose “Add what is missing” for an empty or new phone, then confirm.</li><li>Locked notes come back with the backup too. To open them you need the code you used then, or your recovery key.</li><li>No backup file? Check your Downloads folder, cloud drive and email for files named “keiko-journal-backup-….json”. Without a copy outside the browser, erased data can’t be recovered.</li></ol><p class="note">To move to a new phone: download a backup here, open the app on the new phone, and restore it there.</p>');
 }
 
 /* ---------- views ---------- */
@@ -1921,7 +1922,12 @@ const lockDoc=()=>S.items.get('lock')||null;
 async function lkDerive(code,salt,iter){const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
 async function lkEnc(key,obj){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj)));return{iv:u8b64(iv),ct:u8b64(new Uint8Array(ct))}}
 async function lkDec(key,e){const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(e.iv)},key,b64u8(e.ct));return JSON.parse(new TextDecoder().decode(pt))}
-async function lkMake(code){const salt=crypto.getRandomValues(new Uint8Array(16)),iter=600000,key=await lkDerive(code,salt,iter);return{key,doc:{kind:'lock',id:'lock',salt:u8b64(salt),iter,chk:await lkEnc(key,{ok:1})}}}
+const RK_AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function rkNew(){const u=crypto.getRandomValues(new Uint8Array(20));let t='';for(const b of u)t+=RK_AL[b%32];return t}
+const rkFmt=t=>t.match(/.{4}/g).join('-'),rkNorm=t=>String(t||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+async function lkRecMake(code){const k=rkNew(),salt=crypto.getRandomValues(new Uint8Array(16)),iter=600000,key=await lkDerive(k,salt,iter);return{k,rec:{salt:u8b64(salt),iter,enc:await lkEnc(key,{code})}}}
+async function lkCodeFromRec(doc,secret){try{const k=rkNorm(secret);if(k.length!==20||!doc||!doc.rec)return null;const key=await lkDerive(k,b64u8(doc.rec.salt),doc.rec.iter);const o=await lkDec(key,doc.rec.enc);return o&&/^\d{6,8}$/.test(o.code)?o.code:null}catch(e){return null}}
+async function lkMake(code){const salt=crypto.getRandomValues(new Uint8Array(16)),iter=600000,key=await lkDerive(code,salt,iter),r=await lkRecMake(code);return{key,rk:rkFmt(r.k),doc:{kind:'lock',id:'lock',salt:u8b64(salt),iter,chk:await lkEnc(key,{ok:1}),rec:r.rec}}}
 const lockedNotes=()=>[...S.items.values()].filter(x=>x.kind==='note'&&x.locked&&!x.deletedAt);
 async function lkUnlock(code){
   const d=lockDoc();if(!d)return false;
@@ -1932,13 +1938,45 @@ async function lkUnlock(code){
     S.lk=key;return true;
   }catch(e){return false}
 }
-async function lkSetup(code){const m=await lkMake(code);await put(m.doc);S.lk=m.key;S.lkPlain=new Map();S.lkImg=new Map()}
+async function lkSetup(code){const m=await lkMake(code);await put(m.doc);S.lk=m.key;S.lkPlain=new Map();S.lkImg=new Map();return m.rk}
 async function lkChange(code){
   const m=await lkMake(code),now=Date.now();
   for(const n of lockedNotes()){const pl=S.lkPlain.get(n.id);if(!pl)continue;
     for(const pid of pl.photos||[]){const dt=S.lkImg.get(pid);if(dt)await put({kind:'img',id:pid,enc:await lkEnc(m.key,{data:dt}),ts:now})}
     await put(Object.assign({},n,{enc:await lkEnc(m.key,pl)}))}
-  await put(m.doc);S.lk=m.key;
+  await put(m.doc);S.lk=m.key;return m.rk;
+}
+async function lkNewRec(code){
+  const d=lockDoc();if(!d)return null;
+  try{const key=await lkDerive(code,b64u8(d.salt),d.iter),c=await lkDec(key,d.chk);if(!c||c.ok!==1)return null}catch(e){return null}
+  const r=await lkRecMake(code);await put(Object.assign({},d,{rec:r.rec}));return rkFmt(r.k);
+}
+/* Re-open locked notes from a backup file, using the code or recovery key that was current when it was made. */
+async function lkRecoverRun(data,secret){
+  const items=(Array.isArray(data)?data:(data&&Array.isArray(data.items)?data.items:[])).filter(x=>x&&typeof x==='object'&&typeof x.id==='string');
+  const L=items.find(x=>x.kind==='lock'&&typeof x.salt==='string'&&x.chk);
+  if(!L)return{err:'This file has no lock information, so its locked notes cannot be opened.'};
+  const tryKey=async c=>{try{const k=await lkDerive(c,b64u8(L.salt),L.iter||600000),o=await lkDec(k,L.chk);return o&&o.ok===1?k:null}catch(e){return null}};
+  const sec=String(secret||'').trim();let oldKey=null;
+  if(/^\d{6,8}$/.test(sec))oldKey=await tryKey(sec);else{const c=await lkCodeFromRec(L,sec);if(c)oldKey=await tryKey(c)}
+  if(!oldKey)return{err:'That code or recovery key does not open the notes in this file.'};
+  const cur=lockDoc(),fn=items.filter(x=>x.kind==='note'&&x.locked&&x.enc),fi=new Map(items.filter(x=>x.kind==='img'&&x.enc).map(x=>[x.id,x]));
+  let n=0,bad=0;
+  if(!cur||cur.salt===L.salt){
+    if(!cur)await put(L);
+    for(const x of fn){if(!S.items.has(x.id)){await put(x);n++}}
+    for(const im of fi.values()){if(!S.items.has(im.id))await put(im)}
+    return{n,same:true,orphanFixed:!cur};
+  }
+  if(!S.lk)return{err:'Unlock your notes with your current code first, then try again.'};
+  for(const x of fn){
+    const have=S.items.get(x.id);
+    if(have&&have.locked){let ok=false;try{await lkDec(S.lk,have.enc);ok=true}catch(e){}if(ok)continue}
+    let pl;try{pl=await lkDec(oldKey,x.enc)}catch(e){bad++;continue}
+    for(const pid of pl.photos||[]){const im=fi.get(pid);if(!im)continue;try{const dt=await lkDec(oldKey,im.enc);await put(Object.assign({},im,{enc:await lkEnc(S.lk,{data:dt.data})}));S.lkImg.set(pid,dt.data)}catch(e){}}
+    await put(Object.assign({},x,{enc:await lkEnc(S.lk,pl)}));S.lkPlain.set(x.id,pl);n++;
+  }
+  return{n,bad};
 }
 async function lkReset(){
   for(const n of lockedNotes())await drop(n.id);
@@ -1954,15 +1992,21 @@ function lkRelock(){
 function lkIdle(){clearTimeout(lkTimer);if(S.lk)lkTimer=setTimeout(lkRelock,5*60*1000)}
 ['pointerdown','keydown'].forEach(e=>document.addEventListener(e,()=>{if(S.lk)lkIdle()},true));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)lkRelock()});
-const LK_T={enter:'Locked notes',setup:'Create a code',change:'Change code',manage:'Code settings',reset:'Forgot code'};
+const LK_T={enter:'Locked notes',setup:'Create a code',change:'Change code',manage:'Code settings',reset:'Reset locked notes',forgot:'Forgot code',userk:'Use recovery key',recfile:'Recover from a backup file',newrec:'Recovery key',reckey:'Your recovery key'};
 function lkHtml(){
   const m=lkM,err=m.err?`<p class="err" role="alert">${esc(m.err)}</p>`:'';
   const inp=(id,label,ac)=>`<label class="lkl">${label}<input class="tin lkin" id="${id}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="${ac||'off'}"></label>`;
   let h='';
-  if(m.mode==='enter')h=`<p class="bk-small" style="margin-top:0">Enter your code (6 to 8 digits) to see your locked notes.</p>${inp('lkA','Code')}${err}<button class="btn" type="submit">Unlock</button>`;
-  else if(m.mode==='setup'||m.mode==='change')h=`<p class="bk-small" style="margin-top:0">Choose a code of 6 to 8 digits (numbers only). Locked notes are scrambled with it. <b>Nobody can read them without the code, and it cannot be recovered if you forget it.</b> Write it down somewhere safe.</p>${inp('lkA','New code (6 to 8 digits)','new-password')}${inp('lkB','Type it again','new-password')}${err}<button class="btn" type="submit">${m.mode==='setup'?'Set code':'Change code'}</button>`;
-  else if(m.mode==='manage')h=`<button type="button" class="btn ghost" data-action="lk-change">Change code</button><button type="button" class="btn ghost" data-action="lk-reset">Forgot code…</button>`;
-  else if(m.mode==='reset')h=`<p>This deletes <b>all locked notes</b> and removes the code. Your other notes are not touched. It cannot be undone.</p><button type="button" class="btn" data-action="lk-reset-go">Delete locked notes and reset</button><button type="button" class="btn ghost" data-action="lk-close">Cancel</button>`;
+  const txt=(id,label)=>`<label class="lkl">${label}<input class="tin lkrk" id="${id}" type="text" maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>`;
+  if(m.mode==='enter')h=`<p class="bk-small" style="margin-top:0">Enter your code (6 to 8 digits) to see your locked notes.</p>${inp('lkA','Code')}${err}<button class="btn" type="submit">Unlock</button><button type="button" class="btn ghost" data-action="lk-forgot">Forgot code…</button>`;
+  else if(m.mode==='forgot')h=`<p class="bk-small" style="margin-top:0">Your locked notes can only be opened with your code. These are the ways back in:</p><button type="button" class="btn" data-action="lk-userk">Use my recovery key</button><button type="button" class="btn ghost" data-action="lk-recfile">Recover from a backup file</button><button type="button" class="btn ghost danger" data-action="lk-reset">Reset: delete locked notes</button><p class="bk-small">No recovery key and no backup file? Then the locked notes cannot be opened by anyone, including us.</p>`;
+  else if(m.mode==='userk')h=`<p class="bk-small" style="margin-top:0">Type the recovery key you saved when you made your code. Dashes and spaces do not matter.</p>${txt('lkA','Recovery key')}${err}<button class="btn" type="submit">Open my notes</button><button type="button" class="btn ghost" data-action="lk-forgot">Back</button>`;
+  else if(m.mode==='newrec')h=`<p class="bk-small" style="margin-top:0">${lockDoc()&&lockDoc().rec?'A new recovery key replaces the old one.':'Make a recovery key so a forgotten code does not cost you your locked notes.'} Enter your current code to continue.</p>${inp('lkA','Current code')}${err}<button class="btn" type="submit">Make recovery key</button>`;
+  else if(m.mode==='reckey')h=`<p class="bk-small" style="margin-top:0">If you ever forget your code, this key opens your locked notes. Write it down or save it somewhere safe, away from this phone. <b>It is shown only once.</b></p><div class="rkbox" id="lkRk">${esc(m.rk||'')}</div><div class="nact"><button type="button" class="btn ghost small" data-action="lk-rk-copy">Copy</button></div><label class="lkl chk"><input type="checkbox" id="lkSaved"> I saved my recovery key</label><button class="btn" type="submit" id="lkDone" disabled>Done</button><p class="bk-small">Anyone who has this key and a copy of your backup file can open your locked notes. Keep it private.</p>`;
+  else if(m.mode==='recfile')h=`<p class="bk-small" style="margin-top:0">Pick a backup file that contains your locked notes. Then type the code, or the recovery key, that you used when that backup was made.</p><label class="btn ghost bk-file">${m.fname?esc(m.fname):'Choose backup file'}<input type="file" id="lkFile" accept=".json,application/json"></label>${txt('lkA','Old code or recovery key')}${err}<button class="btn" type="submit"${m.file?'':' disabled'} id="lkGo">Recover locked notes</button>`;
+  else if(m.mode==='setup'||m.mode==='change')h=`<p class="bk-small" style="margin-top:0">${m.recovered?'Your notes are open. Choose a new code now. ':''}Choose a code of 6 to 8 digits (numbers only). Locked notes are scrambled with it. <b>Nobody can read them without the code.</b> Next you get a recovery key to save, in case you forget it. Write the code down somewhere safe too.</p>${inp('lkA','New code (6 to 8 digits)','new-password')}${inp('lkB','Type it again','new-password')}${err}<button class="btn" type="submit">${m.mode==='setup'?'Set code':'Change code'}</button>${m.mode==='setup'?'<button type="button" class="btn ghost" data-action="lk-recfile">Recover locked notes from a backup file</button>':''}`;
+  else if(m.mode==='manage')h=`<p class="bk-small" style="margin-top:0">Recovery key: <b>${lockDoc()&&lockDoc().rec?'set':'not set'}</b></p><button type="button" class="btn ghost" data-action="lk-change">Change code</button><button type="button" class="btn ghost" data-action="lk-newrec">${lockDoc()&&lockDoc().rec?'Make a new recovery key':'Make a recovery key'}</button><button type="button" class="btn ghost" data-action="lk-recfile">Recover from a backup file</button><button type="button" class="btn ghost danger" data-action="lk-reset">Reset: delete locked notes</button>`;
+  else if(m.mode==='reset')h=`<p>This deletes <b>all locked notes</b> and removes the code. Your other notes are not touched. It cannot be undone. If you have a backup file from before, you can still bring them back with <b>Recover from a backup file</b>.</p><button type="button" class="btn" data-action="lk-reset-go">Delete locked notes and reset</button><button type="button" class="btn ghost" data-action="lk-close">Cancel</button>`;
   return `<div class="scrim" data-action="lk-close"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="lkT" tabindex="-1"><div class="sheet-head"><h2 id="lkT">${LK_T[m.mode]}</h2><button class="iconbtn" data-action="lk-close" aria-label="Close">${XICON}</button></div><div class="sheet-body"><form id="lkForm" autocomplete="off">${h}</form></div></div>`;
 }
 function lkPaint(){const r=$('#lkRoot');r.innerHTML=lkHtml();r.querySelectorAll('.sheet,.scrim').forEach(e=>{e.style.animation='none'});const i=r.querySelector('input');if(i)i.focus();else r.querySelector('.sheet').focus()}
@@ -1979,18 +2023,45 @@ function closeLk(){
 }
 async function lkSubmit(){
   const m=lkM;if(!m||m.busy)return;
+  if(m.mode==='reckey'){const t=m.then;closeLk();lkIdle();if(t)t();return}
   const a=($('#lkA')||{}).value||'',b=($('#lkB')||{}).value||'';
   const fail=msg=>{m.err=msg;m.busy=false;lkPaint()};
+  const tooMany=()=>Date.now()<S.lkUntil;
+  const bump=()=>{S.lkFail++;if(S.lkFail%5===0)S.lkUntil=Date.now()+30000};
   m.busy=true;const btn=$('#lkForm [type=submit]');if(btn)btn.disabled=true;
-  if(!/^\d{6,8}$/.test(a))return fail('The code must be 6 to 8 digits.');
   try{
+    if(m.mode==='userk'){
+      if(tooMany())return fail('Too many tries. Wait 30 seconds.');
+      const d=lockDoc();if(!d||!d.rec)return fail('No recovery key was made for this code.');
+      const code=await lkCodeFromRec(d,a);
+      if(!code||!(await lkUnlock(code))){bump();return fail('That recovery key does not match.')}
+      S.lkFail=0;m.mode='change';m.recovered=true;m.err='';m.busy=false;lkPaint();render();return;
+    }
+    if(m.mode==='recfile'){
+      if(tooMany())return fail('Too many tries. Wait 30 seconds.');
+      if(!m.file)return fail('Choose a backup file first.');
+      if(!a.trim())return fail('Type the old code or recovery key.');
+      const r=await lkRecoverRun(m.file,a);
+      if(r.err){if(/does not open/.test(r.err))bump();return fail(r.err)}
+      S.lkFail=0;closeLk();render();
+      toast(r.orphanFixed?'Your lock was restored. Use your old code to open the notes.':r.n?r.n+' locked note'+(r.n===1?'':'s')+' recovered.':(r.bad?'No notes could be opened with that file.':'Nothing new to recover from that file.'));
+      return;
+    }
+    if(m.mode==='newrec'){
+      if(!/^\d{6,8}$/.test(a))return fail('The code must be 6 to 8 digits.');
+      if(tooMany())return fail('Too many tries. Wait 30 seconds.');
+      const rk=await lkNewRec(a);if(!rk){bump();return fail('Wrong code.')}
+      S.lkFail=0;m.mode='reckey';m.rk=rk;m.busy=false;lkPaint();return;
+    }
+    if(!/^\d{6,8}$/.test(a))return fail('The code must be 6 to 8 digits.');
     if(m.mode==='enter'){
-      if(Date.now()<S.lkUntil)return fail('Too many tries. Wait 30 seconds.');
-      if(!(await lkUnlock(a))){S.lkFail++;if(S.lkFail%5===0)S.lkUntil=Date.now()+30000;return fail('Wrong code.')}
+      if(tooMany())return fail('Too many tries. Wait 30 seconds.');
+      if(!(await lkUnlock(a))){bump();return fail('Wrong code.')}
       S.lkFail=0;
     }else{
       if(a!==b)return fail('The two codes do not match.');
-      if(m.mode==='setup')await lkSetup(a);else await lkChange(a);
+      const rk=m.mode==='setup'?await lkSetup(a):await lkChange(a);
+      m.mode='reckey';m.rk=rk;m.recovered=false;m.busy=false;lkPaint();return;
     }
   }catch(e){return fail('Something went wrong. Try again.')}
   const t=m.then;closeLk();lkIdle();if(t)t();
@@ -2672,7 +2743,12 @@ document.addEventListener('click',ev=>{
     case 'lk-now':lkRelock();break;
     case 'lk-manage':openLk('manage');break;
     case 'lk-change':lkM.mode='change';lkM.err='';lkPaint();break;
-    case 'lk-reset':lkM.mode='reset';lkPaint();break;
+    case 'lk-reset':lkM.mode='reset';lkM.err='';lkPaint();break;
+    case 'lk-forgot':lkM.mode='forgot';lkM.err='';lkPaint();break;
+    case 'lk-userk':lkM.mode='userk';lkM.err='';lkPaint();break;
+    case 'lk-newrec':lkM.mode='newrec';lkM.err='';lkPaint();break;
+    case 'lk-recfile':{if(lockDoc()&&!S.lk){lkM.mode='forgot';lkM.err='';lkPaint();toast('Unlock your notes first, then use Code settings → Recover from a backup file.');break}lkM.mode='recfile';lkM.err='';lkM.file=null;lkM.fname='';lkPaint();break}
+    case 'lk-rk-copy':{const t=(lkM&&lkM.rk)||'';try{navigator.clipboard.writeText(t).then(()=>toast('Recovery key copied'),()=>toast('Could not copy. Write it down instead.'))}catch(e){toast('Could not copy. Write it down instead.')}break}
     case 'lk-reset-go':lkReset().then(()=>{closeLk();render();toast('Locked notes deleted and code removed.')});break;
     case 'lk-close':closeLk();break;
     case 'nm-reset':nmSel={t:'Keiko Journal',s:'稽古'};nmSave();nmApply();renderTheme();break;
@@ -2842,7 +2918,7 @@ document.addEventListener('input',ev=>{
 setInterval(()=>{if(S.draft)draftStash()},1500);setInterval(remCheck,60000);setTimeout(remCheck,4000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)remCheck()});document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.draft)draftStash()});window.addEventListener('pagehide',()=>{if(S.draft)draftStash()});
 document.addEventListener('error',ev=>{const t=ev.target;if(t&&t.classList&&t.classList.contains('vth'))t.remove()},true);
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){const m=$('#qaMenu');if(m&&!m.hidden){qaClose();const tb=document.querySelector('[data-action="qa-toggle"]');if(tb)tb.focus();return}}if(ev.key==='Enter'&&ev.target&&ev.target.id==='tgName'&&S.tg){ev.preventDefault();tgAdd(S.tg.ctx);return}if(ev.key==='Escape'){if(!$('#lightbox').hidden)closeLightbox();else if(!$('#tgRoot').hidden){closeTgm();render()}else if(!$('#lkRoot').hidden)closeLk();else if(!$('#exRoot').hidden)closeEx();else if(!$('#bkRoot').hidden)closeBackup();else if(!$('#thRoot').hidden)closeTheme();else if(!$('#clRoot').hidden)closeClass();else if(!$('#evRoot').hidden)closeEvent();else if(S.nd)closeNote(true);else if(S.draft)closeSheet()}});
-document.addEventListener('change',ev=>{const t=ev.target;if(t.id==='impFile'){importFile(t.files[0]);t.value='';return}if(t.id==='remTime'){rem.time=/^\d\d:\d\d$/.test(t.value)?t.value:'09:00';remSave();{const n=new Date();if(rem.time>pad(n.getHours())+':'+pad(n.getMinutes())){try{localStorage.removeItem('kj-rem-last')}catch(e){}}}remCheck();return}if(t.id==='bkRemind'||t.id==='wlRemind'){LS_SET('kj-bk-remind',t.value);renderBars();return}if(t.id==='bkAuto'){setAuto(t.checked);return}if(t.id==='gcShow'){setGcal({show:t.checked});S.gerr='';S.gev={};render();renderBackup();return}if(t.id==='gcTasks'||t.id==='gcSess'){setGcal(t.id==='gcTasks'?{outTasks:t.checked}:{outSessions:t.checked});runCalSync(true);return}if(t.dataset&&t.dataset.tgname!==undefined){const g=tagOf(t.dataset.tgname),nm=t.value.trim();if(g&&nm&&nm!==g.name)put(Object.assign({},g,{name:nm}));else if(g&&!nm)t.value=g.name;return}if(t.id==='ntPhotos'){const fs=[...t.files];t.value='';if(fs.length)addNtPhotos(fs);return}if(t.id==='fpFile'){const f=t.files[0];t.value='';fpPick(f);return}if(t.id==='fPhotos'){const fs=[...t.files];t.value='';if(fs.length)addPhotos(fs)}});
+document.addEventListener('change',ev=>{const t=ev.target;if(t.id==='impFile'){importFile(t.files[0]);t.value='';return}if(t.id==='lkSaved'){const d=$('#lkDone');if(d)d.disabled=!t.checked;return}if(t.id==='lkFile'){const f=t.files&&t.files[0];if(!f||!lkM)return;if(f.size>60e6){lkM.err='That file is too large.';lkPaint();return}const fr=new FileReader();fr.onload=()=>{try{lkM.file=JSON.parse(fr.result);lkM.fname=f.name;lkM.err=''}catch(e){lkM.file=null;lkM.err="That file isn't readable JSON."}const v=($('#lkA')||{}).value;lkPaint();if(v&&$('#lkA'))$('#lkA').value=v};fr.onerror=()=>{lkM.err="Couldn't read that file.";lkPaint()};fr.readAsText(f);return}if(t.id==='remTime'){rem.time=/^\d\d:\d\d$/.test(t.value)?t.value:'09:00';remSave();{const n=new Date();if(rem.time>pad(n.getHours())+':'+pad(n.getMinutes())){try{localStorage.removeItem('kj-rem-last')}catch(e){}}}remCheck();return}if(t.id==='bkRemind'||t.id==='wlRemind'){LS_SET('kj-bk-remind',t.value);renderBars();return}if(t.id==='bkAuto'){setAuto(t.checked);return}if(t.id==='gcShow'){setGcal({show:t.checked});S.gerr='';S.gev={};render();renderBackup();return}if(t.id==='gcTasks'||t.id==='gcSess'){setGcal(t.id==='gcTasks'?{outTasks:t.checked}:{outSessions:t.checked});runCalSync(true);return}if(t.dataset&&t.dataset.tgname!==undefined){const g=tagOf(t.dataset.tgname),nm=t.value.trim();if(g&&nm&&nm!==g.name)put(Object.assign({},g,{name:nm}));else if(g&&!nm)t.value=g.name;return}if(t.id==='ntPhotos'){const fs=[...t.files];t.value='';if(fs.length)addNtPhotos(fs);return}if(t.id==='fpFile'){const f=t.files[0];t.value='';fpPick(f);return}if(t.id==='fPhotos'){const fs=[...t.files];t.value='';if(fs.length)addPhotos(fs)}});
 
 /* ---------- start ---------- */
 (function(){const t=todayStr(),dt=parse(t);S.sel=t;S.cal={y:dt.getFullYear(),m:dt.getMonth()}})();
